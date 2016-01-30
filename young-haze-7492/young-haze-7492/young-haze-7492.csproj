@@ -132,6 +132,7 @@
     </Compile>
     <Compile Include="Helpers\CsvExport.cs" />
     <Compile Include="Helpers\Export.cs" />
+    <Compile Include="Helpers\qbXmlExport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
