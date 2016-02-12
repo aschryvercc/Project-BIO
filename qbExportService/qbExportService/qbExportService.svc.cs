@@ -67,6 +67,35 @@ namespace qbExportService
             return;
         }
 
+        /*
+         * Method:  logEvent()
+         * 
+         * Parameters: string logText
+         * 
+         * Returns: Void
+         * 
+         * Description: Log the event in the Windows Events Logs.
+         */
+        private void logEvent(string logText)
+        {
+            try 
+            {
+                eventLog.WriteEntry(logText);
+            }
+            catch(Exception ex)
+            {
+                /*
+                 * Do something with this exception...
+                 */
+            }
+
+            return;
+        }
+
+        private void addEventLogText(string message)
+        {
+
+        }
         #endregion
 
         #region Methods
@@ -111,6 +140,50 @@ namespace qbExportService
         public string clientVersion(string version)
         {
             string resultValue = null;
+            string eventText = "";
+
+            double clientVersion = Convert.ToDouble(this.parseVersion(version));
+
+            /*
+             * Update these for version control.
+             */
+            double recommendedVersion = 1.0;
+            double minimumVersion = 1.0;
+
+            /*
+             * Build the event log. 
+             */
+            eventText += "WebMethod        : clientVersion()\r\n\r\n";
+            eventText += "Parameters       :\r\n";
+            eventText += "string version = " + version + "\r\n";
+            eventText += "\r\n";
+
+            eventText += "QBWC Version              : " + version + "\r\n";
+            eventText += "Recommended Version       : " + recommendedVersion + "\r\n";
+            eventText += "Minimum Version           : " + minimumVersion + "\r\n";
+            eventText += "Client Version            : " + version.ToString() + "\r\n";
+
+            /*
+             * Log Errors and Warnings
+             */
+            if (clientVersion < recommendedVersion)
+            {
+                resultValue = "W:It is reccomended to upgrade your QBWebConnector";
+            }
+            else if(clientVersion < minimumVersion)
+            {
+                resultValue = "E:You need to upgrade your QBWebConnector";
+            }
+            eventText += "\r\n";
+
+            eventText += "Return Value       :\r\n";
+            eventText += "string resultValue = " + resultValue + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * Log the event.
+             */
+            logEvent(eventText);
 
             return resultValue;
         }
@@ -144,6 +217,31 @@ namespace qbExportService
         public string connectionError(string ticket, string result, string msg)
         {
             string resultValue = null;
+            string eventText = "";
+
+            /*
+             * Build the event log. 
+             */
+            eventText += "WebMethod        : closeConnection()\r\n\r\n";
+            eventText += "Parameters       :\r\n";
+            eventText += "string ticket = " + ticket + "\r\n";
+            eventText += "string result = " + result + "\r\n";
+            eventText += "string msg = " + msg + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * TODO: Determine Return Value.
+             */
+            resultValue = "OK";
+
+            eventText += "Return Value       :\r\n";
+            eventText += "string resultValue = " + resultValue + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * Log the event.
+             */
+            logEvent(eventText);
 
             return resultValue;
         }
