@@ -6,6 +6,7 @@ using System.ServiceModel;
 using System.Text;
 
 using System.Diagnostics; //EventLog
+using System.Collections; //ArrayList
 
 namespace qbExportService
 {
@@ -92,9 +93,18 @@ namespace qbExportService
             return;
         }
 
-        private void addEventLogText(string message)
+        private string parseVersion(string input)
         {
+            string resultValue = "";
 
+            return resultValue;
+        }
+
+        private ArrayList buildRequest()
+        {
+            ArrayList req = new ArrayList();
+
+            return req;
         }
         #endregion
 
@@ -119,6 +129,44 @@ namespace qbExportService
         public string[] authenticate(string userName, string password)
         {
             string[] resultValue = new string[2];
+            string eventText = "";
+
+            /*
+             * Build the event log. 
+             */
+            eventText += "WebMethod        : authenticate()\r\n\r\n";
+            eventText += "Parameters       :\r\n";
+            eventText += "string userName = " + userName + "\r\n";
+            eventText += "string password = " + password + "\r\n"; //Also DON'T do this...
+            eventText += "\r\n";
+
+            resultValue[0] = Guid.NewGuid().ToString();
+
+            //TODO: Add real world authentication for validating username and password
+            //That means DON'T do this...
+            if (userName.Equals("username") &&
+                password.Trim().Equals("thisisbad"))
+            {
+                /*
+                 * Empty string for the second string value asking QBWebConnector 
+                 * to connect to the company file that is currently opened in QB.
+                 */
+                resultValue[1] = "c:\\Program Files\\Intuit\\QuickBooks\\sample_product-based business.qbw"; //This is from the sample file...
+            }
+            else
+            {
+                resultValue[1] = "nvu";
+            }
+
+            eventText += "Return Value       :\r\n";
+            eventText += "string resultValue[0] = " + resultValue[0] + "\r\n";
+            eventText += "string resultValue[1] = " + resultValue[1] + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * Log the event.
+             */
+            logEvent(eventText);
 
             return resultValue;
         }
@@ -201,6 +249,29 @@ namespace qbExportService
         public string closeConnection(string ticket)
         {
             string resultValue = null;
+            string eventText = "";
+
+            /*
+             * Build the event log. 
+             */
+            eventText += "WebMethod        : closeConnection()\r\n\r\n";
+            eventText += "Parameters       :\r\n";
+            eventText += "string ticket = " + ticket + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * TODO: Determine Return Value.
+             */
+            resultValue = "OK";
+
+            eventText += "Return Value       :\r\n";
+            eventText += "string resultValue = " + resultValue + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * Log the event.
+             */
+            logEvent(eventText);
 
             return resultValue;
         }
@@ -220,9 +291,17 @@ namespace qbExportService
             string eventText = "";
 
             /*
+             * Constant string values for QB errors.
+             * Add values as you need them.
+             */
+            const string QB_ERROR_WHEN_PARSING = "0x80040400"; // 0x80040400 - QuickBooks found an error when parsing the provided XML text stream 
+            const string QB_COULDNT_ACCESS_QB = "0x80040401";  // 0x80040401 - Could not access QuickBooks. 
+            const string QB_UNEXPECTED_ERROR = "0x80040402";   // 0x80040402 - Unexpected error. Check the qbsdklog.txt file for possible, additional information. 
+
+            /*
              * Build the event log. 
              */
-            eventText += "WebMethod        : closeConnection()\r\n\r\n";
+            eventText += "WebMethod        : connectionError()\r\n\r\n";
             eventText += "Parameters       :\r\n";
             eventText += "string ticket = " + ticket + "\r\n";
             eventText += "string result = " + result + "\r\n";
@@ -230,10 +309,26 @@ namespace qbExportService
             eventText += "\r\n";
 
             /*
-             * TODO: Determine Return Value.
+             * Determine error code.
              */
-            resultValue = "OK";
+            if (result.Trim().Equals(QB_ERROR_WHEN_PARSING))
+            {
 
+            }
+            else if (result.Trim().Equals(QB_COULDNT_ACCESS_QB))
+            {
+
+            }
+            else if (result.Trim().Equals(QB_UNEXPECTED_ERROR))
+            {
+
+            }
+            else
+            {
+
+            }
+
+            eventText += "\r\n";
             eventText += "Return Value       :\r\n";
             eventText += "string resultValue = " + resultValue + "\r\n";
             eventText += "\r\n";
@@ -258,6 +353,32 @@ namespace qbExportService
         public string getLastError(string ticket)
         {
             string resultValue = null;
+            string eventText = "";
+
+            /*
+             * Build the event log. 
+             */
+            eventText += "WebMethod        : getLastError()\r\n\r\n";
+            eventText += "Parameters       :\r\n";
+            eventText += "string ticket = " + ticket + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * TODO: Determine last error code... maybe add a global.
+             * For now just return a fake message.
+             */
+            resultValue = "QuickBooks is not running.";
+
+
+            eventText += "\r\n";
+            eventText += "Return Value       :\r\n";
+            eventText += "string resultValue = " + resultValue + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * Log the event.
+             */
+            logEvent(eventText);
 
             return resultValue;
         }
@@ -277,6 +398,42 @@ namespace qbExportService
         public int receiveResponseXML(string ticket, string response, string result, string msg)
         {
             int resultValue = 0;
+            string eventText = "";
+
+            /*
+             * Build the event log. 
+             */
+            eventText += "WebMethod        : recieveResponseXML()\r\n\r\n";
+            eventText += "Parameters       :\r\n";
+            eventText += "string ticket = " + ticket + "\r\n";
+            eventText += "string response = " + response + "\r\n";
+            eventText += "string result = " + result + "\r\n";
+            eventText += "string msg = " + msg + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * When a error occurs, return a error code in the form of a -ve int.
+             */ 
+            if (!result.ToString().Equals(""))
+            {
+                resultValue = -101;
+            }
+            else
+            {
+                eventText += "Lenght of response revieved = " + response.Length + "\r\n";
+
+
+            }
+
+            eventText += "\r\n";
+            eventText += "Return Value       :\r\n";
+            eventText += "string resultValue = " + resultValue.ToString() + "\r\n";
+            eventText += "\r\n";
+
+            /*
+             * Log the event.
+             */
+            logEvent(eventText);
 
             return resultValue;
         }
