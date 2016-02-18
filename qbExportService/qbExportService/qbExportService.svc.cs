@@ -7,6 +7,7 @@ using System.Text;
 
 using System.Diagnostics; //EventLog
 using System.Collections; //ArrayList
+using System.Text.RegularExpressions; //Regex
 
 namespace qbExportService
 {
@@ -93,9 +94,36 @@ namespace qbExportService
             return;
         }
 
-        private string parseVersion(string input)
+        /*
+         * Method:  parseVersion()
+         * 
+         * Parameters: string versionNumber
+         * 
+         * Returns: resultValue.
+         * 
+         * Description: Returns the major and minor components from a standard version number, otherwise an empty string.
+         */
+        private string parseVersion(string versionNumber)
         {
             string resultValue = "";
+            string majorNumber = "";
+            string minorNumebr = "";
+            
+            Regex regexVersion = new Regex(@"^(?<major>\d+)\.(?<minor>\d+)(\.\w+){0,2}$", RegexOptions.Compiled);
+
+            Match matchVersion = regexVersion.Match(versionNumber);
+
+            /*
+             * Get the version numbers major and minor components, 
+             * if the version matches.
+             */
+            if (matchVersion.Success)
+            {
+                majorNumber = matchVersion.Result("${major}");
+                minorNumebr = matchVersion.Result("${minor}");
+
+                resultValue = majorNumber + "." + minorNumebr;
+            }
 
             return resultValue;
         }
@@ -103,6 +131,10 @@ namespace qbExportService
         private ArrayList buildRequest()
         {
             ArrayList req = new ArrayList();
+
+            /*
+             * TODO: Figure out how to build a proper request(s).
+             */
 
             return req;
         }
@@ -185,12 +217,15 @@ namespace qbExportService
          * 
          * Description: QBWC version control.
          */
-        public string clientVersion(string version)
+        public string clientVersion(string versionNumber)
         {
             string resultValue = null;
             string eventText = "";
 
-            double clientVersion = Convert.ToDouble(this.parseVersion(version));
+            /*
+             * Get the major and minor parts from the version number.
+             */
+            double clientVersion = Convert.ToDouble(this.parseVersion(versionNumber));
 
             /*
              * Update these for version control.
@@ -203,13 +238,13 @@ namespace qbExportService
              */
             eventText += "WebMethod        : clientVersion()\r\n\r\n";
             eventText += "Parameters       :\r\n";
-            eventText += "string version = " + version + "\r\n";
+            eventText += "string version = " + versionNumber + "\r\n";
             eventText += "\r\n";
 
-            eventText += "QBWC Version              : " + version + "\r\n";
+            eventText += "QBWC Version              : " + versionNumber + "\r\n";
             eventText += "Recommended Version       : " + recommendedVersion + "\r\n";
             eventText += "Minimum Version           : " + minimumVersion + "\r\n";
-            eventText += "Client Version            : " + version.ToString() + "\r\n";
+            eventText += "Client Version            : " + clientVersion.ToString() + "\r\n";
 
             /*
              * Log Errors and Warnings
@@ -398,7 +433,11 @@ namespace qbExportService
         public int receiveResponseXML(string ticket, string response, string result, string msg)
         {
             int resultValue = 0;
+            int requestCount = 0;
+            int totalRequests = 0;
+            int percentage = 0;
             string eventText = "";
+            ArrayList request = null;
 
             /*
              * Build the event log. 
@@ -422,7 +461,10 @@ namespace qbExportService
             {
                 eventText += "Lenght of response revieved = " + response.Length + "\r\n";
 
+                request = buildRequest();
 
+                totalRequests = request.Count;
+                requestCount = Convert.ToInt32(Session["counter"]);
             }
 
             eventText += "\r\n";
