@@ -343,6 +343,11 @@ namespace qbExportService
             eventText += "string msg = " + msg + "\r\n";
             eventText += "\r\n";
 
+            if (Context.Current.Ce_counter == null)
+            {
+                Context.Current.Ce_counter = 0;
+            }
+
             /*
              * Determine error code.
              */
@@ -360,7 +365,14 @@ namespace qbExportService
             }
             else
             {
+                if (Context.Current.Ce_counter == 0)
+                {
 
+                }
+                else
+                {
+
+                }
             }
 
             eventText += "\r\n";
@@ -372,6 +384,11 @@ namespace qbExportService
              * Log the event.
              */
             logEvent(eventText);
+
+            /*
+             * Increase connection error count.
+             */
+            Context.Current.Ce_counter += 1;
 
             return resultValue;
         }
@@ -464,7 +481,17 @@ namespace qbExportService
                 request = buildRequest();
 
                 totalRequests = request.Count;
-                requestCount = Convert.ToInt32(Session["counter"]);
+                requestCount = Convert.ToInt32(Context.Current.Counter);
+
+                percentage = (requestCount * 100) / totalRequests;
+                
+                if (percentage >= 100)
+                {
+                    requestCount = 0;
+                    Context.Current.Counter = 0;
+                }
+
+                resultValue = percentage;
             }
 
             eventText += "\r\n";
