@@ -48,6 +48,9 @@ namespace DbScheduler
         {
             try
             {
+                Thread thread = null;
+                Job jobObject = null;
+
                 /*
                  * Get all job implementations.
                  */
@@ -59,8 +62,35 @@ namespace DbScheduler
                 if (jobs != null &&
                     jobs.Count() > 0)
                 {
+                    foreach (Type job in jobs)
+                    {
+                        if (IsRealClass(job))
+                        {
+                            try
+                            {
+                                /*
+                                 * Start a new job.
+                                 */
+                                jobObject = (Job)Activator.CreateInstance(job);
+                                thread = new Thread(new ThreadStart(jobObject.ExecuteJob));
 
+                                thread.Start();
+                            }
+                            catch (Exception ex)
+                            {
+                                /*
+                                 * Do something here with the exception...
+                                 */
+                            }
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                /*
+                 * Do something here with the exception..
+                 */
             }
         }
 
