@@ -525,6 +525,52 @@ namespace qbExportService
                                      string qbXMLCountry, int qbXMLMajorVersion, int qbXMLMinorVersion)
         {
             string resultValue = null;
+            string eventText = "";
+            ArrayList request = buildRequest();
+            int totalRequests = request.Count;
+
+            if (Context.Current.Counter == null)
+            {
+                Context.Current.Counter = 0;
+            }
+
+            int requestCount = Context.Current.Counter;
+
+            /*
+             * Build the event log. 
+             */
+            eventText += "WebMethod        : sendResponseXML()\r\n\r\n";
+            eventText += "Parameters       :\r\n";
+            eventText += "string ticket = " + ticket + "\r\n";
+            eventText += "string response = " + response + "\r\n";
+            eventText += "string companyFileName = " + companyFileName + "\r\n";
+            eventText += "string qbXMLCountry = " + qbXMLCountry + "\r\n";
+            eventText += "string qbXMLMajorVersion = " + qbXMLMajorVersion + "\r\n";
+            eventText += "string qbXMLMinorVersion = " + qbXMLMinorVersion + "\r\n";
+            eventText += "\r\n";
+
+            if (requestCount < totalRequests)
+            {
+                resultValue = request[requestCount].ToString();
+                eventText += "Sending request number = " + (requestCount + 1) + "\r\n";
+                Context.Current.Counter += 1;
+            }
+            else
+            {
+                requestCount = 0;
+                Context.Current.Counter = 0;
+                resultValue = "";
+            }
+
+            eventText += "\r\n";
+            eventText += "Return Value       :\r\n";
+            eventText += "string resultValue = " + resultValue.ToString() + "\r\n";
+            eventText += "\r\n";
+
+            /*
+            * Log the event.
+            */
+            logEvent(eventText);           
 
             return resultValue;
         }
