@@ -3,23 +3,17 @@ using System.Net;
 using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+
 using System.Linq;
 using System.Web;
 
-namespace young_haze_7492.Helpers
+namespace DbConnector
 {
-    class connectInfo
-    {
-        public IPAddress connectIP;
-        public string serverName;
-        public string userName;
-        public string password;
-    }
 
-    public class connecter
+    public class DbConnector
     {
         //tracks connection info
-        private connectInfo cnnInfo = new connectInfo();
+        private DbConnectorInfo cnnInfo = new DbConnectorInfo();
 
         //build select statement.
         private string buildSelect(bool hasJoins, Dictionary<string,string> leftPair, Dictionary<string, string> rightPair, List<string> columns, List<string> conditions)
@@ -111,6 +105,7 @@ namespace young_haze_7492.Helpers
             }
             catch (Exception ex)
             {
+                //Add exception handling...
             }
 
             return pulledContents;
@@ -130,6 +125,7 @@ namespace young_haze_7492.Helpers
             }
             catch
             {
+                //Add exception handling...
             }
         }
 
