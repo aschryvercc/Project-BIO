@@ -43,7 +43,6 @@
     <Compile Include="JobManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepeatableJob.cs" />
-    <Compile Include="SingleExecutionJob.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -15,6 +15,15 @@ namespace DbConnector
         //tracks connection info
         private DbConnectorInfo cnnInfo = new DbConnectorInfo();
 
+        private SqlConnection sourceConn = null;  //The source database connection
+        private SqlConnection destinationConn = null; //The destination database connection
+        private SqlDataAdapter dbDataAdapter = null;  //A data adapter used to bridge the data to a data set object
+        private string connectionString = "";   //connection string to a database when connecting the source or destination
+        private string sourceDBName = "";   //Name of the source database
+        private string destinationDBName = "";  //Name of the destination database
+        private List<string> sourceTables = new List<string>(); //List of the names of the source database's tables
+        private List<string> destinationTables = new List<string>();    //List of the names of the destination database's tables
+
         //build select statement.
         private string buildSelect(bool hasJoins, Dictionary<string,string> leftPair, Dictionary<string, string> rightPair, List<string> columns, List<string> conditions)
         {
@@ -137,6 +146,83 @@ namespace DbConnector
                 "Initial Catalog = " + cnnInfo.serverName + "; " +
                 "User ID = " + cnnInfo.userName + ";" +
                 "Password = " + cnnInfo.password;
+        }
+
+        /*
+         * Method Name: InitData
+         * Parameters: string server, string userid, string password, string database
+         * Return: SqlConnection
+         * Description: This will initalize the data of the form. In this case the method
+         * will create a SQL Server connection that it will return based on the passed parameters.
+         */
+        public SqlConnection InitData(string server, string userid, string password, string database)
+        {
+            //Setup the connection string
+            SqlConnection conn = null;
+            string connectionString = @"server=" + server + ";userid=" + userid + ";password=" + password + ";database=" + database;
+
+            //Try to connect to the database based on the connection string
+            //Also fill the table list immediately since the database is currently selected
+            try
+            {
+                //Open connection to database
+                conn = new SqlConnection(connectionString);
+                conn.Open();
+            }
+            catch (SqlException ex)
+            {
+                /*
+                 * TODO: Handle exception.
+                 */
+            }
+
+            //Return the new MySql Connection
+            return conn;
+        }
+
+        //Method Name: CloseDBConnection
+        //Parameters: None
+        //Return: void
+        //Description: The event handler for when the form is about to close. The method
+        //  will close any lingering connections.
+        public void CloseDBConnection()
+        {
+            //Close the connections before the application closes
+            if (sourceConn != null &&
+                sourceConn.State == ConnectionState.Open)
+            {
+                sourceConn.Close();
+            }
+            if (destinationConn != null &&
+                destinationConn.State == ConnectionState.Open)
+            {
+                destinationConn.Close();
+            }
+        } 
+
+        /*
+         * Method Name: ExtractTables
+         * Parameters: SqlConnection conn
+         * Return: List<string>
+         * Description: This will extract a list of table names from the MySql database from the connection.
+         */
+        private List<string> ExtractTables(SqlConnection conn)
+        {
+            List<string> tempList = new List<string>();
+
+            if (conn != null &&
+                conn.State == ConnectionState.Open)
+            {
+                //This retrieves the table names from the database.
+                DataTable schema = conn.GetSchema("Tables");
+                foreach (DataRow row in schema.Rows)
+                {
+                    tempList.Add(row[2].ToString());
+                }
+            }
+
+            //Return the list of the table names from the database connection
+            return tempList;
         }
     }
 }
