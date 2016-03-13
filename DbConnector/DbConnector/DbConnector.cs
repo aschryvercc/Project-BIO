@@ -155,7 +155,7 @@ namespace DbConnector
          * Description: This will initalize the data of the form. In this case the method
          * will create a SQL Server connection that it will return based on the passed parameters.
          */
-        public SqlConnection InitData(string server, string userid, string password, string database)
+        private SqlConnection InitData(string server, string userid, string password, string database)
         {
             //Setup the connection string
             SqlConnection conn = null;
@@ -180,8 +180,30 @@ namespace DbConnector
             return conn;
         }
 
+        /*
+         * Method Name: OpenDBConnection
+         * Parameters: DbConnectorInfo sourceDbConnectorInfo, DbConnectorInfo destinationDbConnectorInfo
+         * Return: void
+         * Description: The event handler for the connect to database button. When clicked it will open
+         * a new dialogue to get the database information used to create the connection.
+         */
+        public void OpenDBConnection(DbConnectorInfo sourceDbConnectorInfo, DbConnectorInfo destinationDbConnectorInfo)
+        {
+            //If logging into the source database connect to it
+            sourceConn = InitData(sourceDbConnectorInfo.GetServer(), sourceDbConnectorInfo.GetUserID(), 
+                                  sourceDbConnectorInfo.GetPassword(), sourceDbConnectorInfo.GetDatabase());
+            sourceTables = ExtractTables(sourceConn);
+            sourceDBName = sourceDbConnectorInfo.GetDatabase();
+
+            //If logging into the destination database connect to it
+            destinationConn = InitData(destinationDbConnectorInfo.GetServer(), destinationDbConnectorInfo.GetUserID(), 
+                                       destinationDbConnectorInfo.GetPassword(), destinationDbConnectorInfo.GetDatabase());
+            destinationTables = ExtractTables(destinationConn);
+            destinationDBName = destinationDbConnectorInfo.GetDatabase();
+        }
+
         //Method Name: CloseDBConnection
-        //Parameters: None
+        //Parameters: void
         //Return: void
         //Description: The event handler for when the form is about to close. The method
         //  will close any lingering connections.
