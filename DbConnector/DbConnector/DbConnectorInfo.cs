@@ -10,46 +10,38 @@ namespace DbConnector
 {
     class DbConnectorInfo
     {
-        private IPAddress connectIP;
-        private string server;
-        private string userid;
-        private string password;
-        private string database;
+        private IPAddress _connectIP; //Don't know what to do with this...
 
-        //Method Name: GetUserID
-        //Parameters: void
-        //Return: string
-        //Description: Read only method allowing access to the user id.
-        public string GetUserID()
+        
+        private string _userid;
+        public string userid
         {
-            return userid;
+            set { this.userid = value; }
+            get { return this._userid; }
         }
 
-        //Method Name: GetServer
-        //Parameters: void
-        //Return: string
-        //Description: Read only method allowing access to the server.
-        public string GetServer()
+
+        private string _server;
+        public string server
         {
-            return server;
+            set { this._server = value; }
+            get { return this._server; }
         }
 
-        //Method Name: GetPassword
-        //Parameters: void
-        //Return: string
-        //Description: Read only method allowing access to the password.
-        public string GetPassword()
+
+        private string _password;
+        public string password
         {
-            return password;
+            set { this._password = value; }
+            get { return this._password; }
         }
 
-        //Method Name: GetDatabase
-        //Parameters: void
-        //Return: string
-        //Description: Read only method allowing access to the database.
-        public string GetDatabase()
+
+        private string _database;
+        public string database
         {
-            return database;
+            set { this._database = value; }
+            get { return this._database; }
         }
     }
 }
