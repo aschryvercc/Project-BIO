@@ -10,7 +10,7 @@ using System.Web;
 namespace DbConnector
 {
 
-    public class DbConnector
+    public class DbConnection
     {
         //tracks connection info
         private DbConnectorInfo sourceDbConnectorInfo; //The source connection information
@@ -25,7 +25,7 @@ namespace DbConnector
         /*
          * Constructor
          */
-        public DbConnector(DbConnectorInfo connectionInfo)
+        public DbConnection(DbConnectorInfo connectionInfo)
         {
             sourceDbConnectorInfo = connectionInfo;
         }

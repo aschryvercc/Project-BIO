@@ -8,7 +8,7 @@ using System.Net;   //IPAddress
 
 namespace DbConnector
 {
-    class DbConnectorInfo
+    public class DbConnectorInfo
     {
         private IPAddress _connectIP; //Don't know what to do with this...
 
