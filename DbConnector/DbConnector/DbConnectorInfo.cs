@@ -16,7 +16,7 @@ namespace DbConnector
         private string _userid;
         public string userid
         {
-            set { this.userid = value; }
+            set { this._userid = value; }
             get { return this._userid; }
         }
 
