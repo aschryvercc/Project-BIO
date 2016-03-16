@@ -229,8 +229,18 @@ namespace DbConnector
             return tempList;
         }
 
-
-        private DataTable compareTablesMissing(DbConnectorInfo compareDB, string leftT, string leftID, string rightT, string rightID)
+        /*
+         * Method Name: checkMissingRows
+         * Parameters: 
+         DbConnectorInfo compareDB -- Connection info for second database
+         string leftT -- Left table to be compared against
+         string leftID -- right table to be compared against
+         string rightT -- table ID
+         string rightID -- table ID
+         * Return: DataTable missingContents -- contents to be synced over
+         * Description: This will compare two tables in two databases and find any missing rows.
+         */
+        private DataTable checkMissingRows(DbConnectorInfo compareDB, string leftT, string leftID, string rightT, string rightID)
         {
             DataTable leftContents = new DataTable();
             DataTable rightContents = new DataTable();
