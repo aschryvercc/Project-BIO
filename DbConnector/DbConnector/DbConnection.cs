@@ -251,7 +251,7 @@ namespace DbConnector
          * Return: DataTable missingContents -- contents to be synced over
          * Description: This will compare two tables in two databases and find any missing rows.
          */
-        private DataTable checkMissingRows(DbConnectorInfo compareDB, string leftT, string leftID, string rightT, string rightID)
+        private DataTable checkMissingRows(SqlConnection destinationConn, string leftT, string leftID, string rightT, string rightID)
         {
             DataTable leftContents = new DataTable();
             DataTable rightContents = new DataTable();
@@ -263,7 +263,7 @@ namespace DbConnector
                 /*
                 * Open the database for sql commands.
                 */
-                OpenDBConnection();
+                //OpenDBConnection();
 
                 #region select statement for table 1
                 /*
@@ -287,7 +287,7 @@ namespace DbConnector
                 /*
                  * Select statement for table 2
                  */
-                cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database));
+                cmd = new SqlCommand("Select * from " + rightT, destinationConn);
 
                 /*
                  * Run the command and get the results.
@@ -339,7 +339,7 @@ namespace DbConnector
             return missingContents;
         }
 
-        private DataTable checkUpdateRows(DbConnectorInfo compareDB, string leftT, string leftID, string rightT, string rightID)
+        private DataTable checkUpdateRows(SqlConnection destinationConn, string leftT, string leftID, string rightT, string rightID)
         {
             DataTable leftContents = new DataTable();
             DataTable rightContents = new DataTable();
@@ -351,7 +351,7 @@ namespace DbConnector
                 /*
                  * Open the database for sql commands.
                  */
-                OpenDBConnection();
+                //OpenDBConnection();
 
                 #region select statement for table 1
                 /*
@@ -375,7 +375,7 @@ namespace DbConnector
                 /*
                  * Select statement for table 2
                  */
-                cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database));
+                cmd = new SqlCommand("Select * from " + rightT, destinationConn);
 
                 /*
                  * Run the command and get the results.
