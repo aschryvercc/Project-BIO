@@ -203,6 +203,7 @@ namespace DbConnector
             }
         } 
 
+        
         /*
          * Method Name: ExtractTables
          * Parameters: SqlConnection conn
@@ -227,5 +228,74 @@ namespace DbConnector
             //Return the list of the table names from the database connection
             return tempList;
         }
+
+
+        private DataTable compareTablesMissing(DbConnectorInfo compareDB, string leftT, string leftID, string rightT, string rightID)
+        {
+            DataTable leftContents = new DataTable();
+            DataTable rightContents = new DataTable();
+            DataTable missingContents = new DataTable();
+            bool rowPresent = false;
+
+            //connection for table 1
+            SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
+
+            //get left contents
+            try
+            {
+                OpenDBConnection();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(leftContents);
+                CloseDBConnection();
+                da.Dispose();
+            }
+            catch
+            {
+
+            }
+            
+            //connection string for table 2
+            cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database);
+
+            //get right contents
+            try
+            {
+                OpenDBConnection();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(rightContents);
+                CloseDBConnection();
+                da.Dispose();
+            }
+            catch
+            {
+
+            }
+
+            //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
+
+            //iterate left side.
+            foreach (DataRow leftRow in leftContents.Rows)
+            {
+                //iterate right side.
+                foreach (DataRow rightRow in rightContents.Rows)
+                {
+                    //if row is found, mark so, break and continue.
+                    if (leftRow.Field<Type>(leftID) == rightRow.Field<Type>(rightID))
+                    {
+                        rowPresent = true;
+                        break;
+                    }
+                }
+                //if row is not found, add to list to be synced.
+                if (rowPresent != true)
+                {
+                    missingContents.Rows.Add(leftRow);
+                }
+                rowPresent = false;
+            }
+
+            return missingContents;
+        }
+
     }
 }
