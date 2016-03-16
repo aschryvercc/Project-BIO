@@ -17,10 +17,16 @@ namespace DbConnector
         private SqlConnection sourceConn = null;  //The source database connection
         private SqlDataAdapter dbDataAdapter = null;  //A data adapter used to bridge the data to a data set object
         private string connectionString = "";   //connection string to a database when connecting the source or destination
-        private string sourceDBName = "";   //Name of the source database
-        private string destinationDBName = "";  //Name of the destination database
-        private List<string> sourceTables = new List<string>(); //List of the names of the source database's tables
-        private List<string> destinationTables = new List<string>();    //List of the names of the destination database's tables
+        //private string sourceDBName = "";   //Name of the source database
+        //private string destinationDBName = "";  //Name of the destination database
+        //private List<string> sourceTables = new List<string>(); //List of the names of the source database's tables
+        //private List<string> destinationTables = new List<string>();    //List of the names of the destination database's tables
+
+        private bool _ConnectionOpen;
+        public bool ConnectionOpen
+        {
+            get { return _ConnectionOpen; }
+        }
 
         /*
          * Constructor
@@ -28,6 +34,7 @@ namespace DbConnector
         public DbConnection(DbConnectorInfo connectionInfo)
         {
             sourceDbConnectorInfo = connectionInfo;
+            _ConnectionOpen = false;
         }
 
         //execute pull into datatable
@@ -38,10 +45,10 @@ namespace DbConnector
 
             try
             {
-                OpenDBConnection();
+                //OpenDBConnection();
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(pulledContents);
-                CloseDBConnection();
+                //CloseDBConnection();
                 da.Dispose();
             }
             catch (Exception ex)
@@ -58,9 +65,9 @@ namespace DbConnector
 
             try
             {
-                OpenDBConnection();
+                //OpenDBConnection();
                 cmd.ExecuteNonQuery();
-                CloseDBConnection();
+                //CloseDBConnection();
             }
             catch
             {
@@ -178,13 +185,15 @@ namespace DbConnector
          * Description: The method will open a connection to a database and get the 
          * database information used to create the connection.
          */
-        private void OpenDBConnection()
+        public void OpenDBConnection()
         {
             //If logging into the source database connect to it
             sourceConn = InitData(sourceDbConnectorInfo.server, sourceDbConnectorInfo.userid, 
                                   sourceDbConnectorInfo.password, sourceDbConnectorInfo.database);
-            sourceTables = ExtractTables(sourceConn);
-            sourceDBName = sourceDbConnectorInfo.database;
+
+            _ConnectionOpen = true;
+            //sourceTables = ExtractTables(sourceConn);
+            //sourceDBName = sourceDbConnectorInfo.database;
         }
 
         /*
@@ -193,7 +202,7 @@ namespace DbConnector
          * Return: void
          * Description: The method will close any lingering connections.
          */
-        private void CloseDBConnection()
+        public void CloseDBConnection()
         {
             //Close the connections before the application closes
             if (sourceConn != null &&
@@ -201,6 +210,8 @@ namespace DbConnector
             {
                 sourceConn.Close();
             }
+
+            _ConnectionOpen = false;
         } 
 
         
@@ -210,7 +221,7 @@ namespace DbConnector
          * Return: List<string>
          * Description: This will extract a list of table names from the MySql database from the connection.
          */
-        private List<string> ExtractTables(SqlConnection conn)
+        public List<string> ExtractTables(SqlConnection conn)
         {
             List<string> tempList = new List<string>();
 
@@ -293,7 +304,7 @@ namespace DbConnector
                 /*
                  * Close the database connection.
                  */
-                CloseDBConnection();
+                //CloseDBConnection();
             }
             catch (Exception ex)
             {
@@ -381,7 +392,7 @@ namespace DbConnector
                 /*
                  * Close the database connection.
                  */
-                CloseDBConnection();
+                //CloseDBConnection();
             }
             catch (Exception ex)
             {
