@@ -307,5 +307,81 @@ namespace DbConnector
             return missingContents;
         }
 
+        private DataTable checkUpdateRows(DbConnectorInfo compareDB, string leftT, string leftID, string rightT, string rightID)
+        {
+            DataTable leftContents = new DataTable();
+            DataTable rightContents = new DataTable();
+            DataTable missingContents = new DataTable();
+            bool rowPresent = false;
+
+            //connection for table 1
+            SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
+
+            //get left contents
+            try
+            {
+                OpenDBConnection();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(leftContents);
+                CloseDBConnection();
+                da.Dispose();
+            }
+            catch
+            {
+
+            }
+
+            //connection string for table 2
+            cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database);
+
+            //get right contents
+            try
+            {
+                OpenDBConnection();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(rightContents);
+                CloseDBConnection();
+                da.Dispose();
+            }
+            catch
+            {
+
+            }
+
+            //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
+
+            //iterate left side.
+            foreach (DataRow leftRow in leftContents.Rows)
+            {
+                //iterate right side.
+                foreach (DataRow rightRow in rightContents.Rows)
+                {
+                    //iterate through fields
+                    List<string> leftVals = new List<string>();
+                    List<string> rightVals = new List<string>();
+
+                    //add all fields to seperate lists for comparison.
+                    foreach (string value in leftRow.ItemArray)
+                    {
+                        leftVals.Add(value);
+                    }
+                    foreach (string value in rightRow.ItemArray)
+                    {
+                        rightVals.Add(value);
+                    }
+                    //iterate through list, if they do not match, an update is required and the data should be added to be carried over.
+                    for (int i = 0; i <= leftVals.Count; i++)
+                    {
+                        if (leftVals[i] != rightVals[i])
+                        {
+                            missingContents.Rows.Add(leftRow);
+                        }
+                    }
+                }
+            }
+
+            return missingContents;
+        }
+
     }
 }
