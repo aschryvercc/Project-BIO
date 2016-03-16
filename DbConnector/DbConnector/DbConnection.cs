@@ -232,11 +232,11 @@ namespace DbConnector
         /*
          * Method Name: checkMissingRows
          * Parameters: 
-         DbConnectorInfo compareDB -- Connection info for second database
-         string leftT -- Left table to be compared against
-         string leftID -- right table to be compared against
-         string rightT -- table ID
-         string rightID -- table ID
+         *  DbConnectorInfo compareDB -- Connection info for second database
+         *  string leftT -- Left table to be compared against
+         *  string leftID -- right table to be compared against
+         *  string rightT -- table ID
+         *  string rightID -- table ID
          * Return: DataTable missingContents -- contents to be synced over
          * Description: This will compare two tables in two databases and find any missing rows.
          */
@@ -247,38 +247,59 @@ namespace DbConnector
             DataTable missingContents = new DataTable();
             bool rowPresent = false;
 
-            //connection for table 1
-            SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
-
-            //get left contents
             try
             {
+                /*
+                * Open the database for sql commands.
+                */
                 OpenDBConnection();
+
+                #region select statement for table 1
+                /*
+                 * Select statement for table 1
+                 */
+                SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
+
+                /*
+                 * Run the command and get the results.
+                 */
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(leftContents);
-                CloseDBConnection();
+
+                /*
+                 * Dispose the sql adapter.
+                 */
                 da.Dispose();
-            }
-            catch
-            {
+                #endregion
 
-            }
-            
-            //connection string for table 2
-            cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database);
+                #region select statement for table 2
+                /*
+                 * Select statement for table 2
+                 */
+                cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database));
 
-            //get right contents
-            try
-            {
-                OpenDBConnection();
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                /*
+                 * Run the command and get the results.
+                 */
+                da = new SqlDataAdapter(cmd);
                 da.Fill(rightContents);
-                CloseDBConnection();
-                da.Dispose();
-            }
-            catch
-            {
 
+                /*
+                 * Dispose the sql adapter.
+                 */
+                da.Dispose();
+                #endregion
+
+                /*
+                 * Close the database connection.
+                 */
+                CloseDBConnection();
+            }
+            catch (Exception ex)
+            {
+                /*
+                 * Do something with the exception.
+                 */
             }
 
             //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
@@ -314,38 +335,59 @@ namespace DbConnector
             DataTable missingContents = new DataTable();
             bool rowPresent = false;
 
-            //connection for table 1
-            SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
-
-            //get left contents
             try
             {
+                /*
+                 * Open the database for sql commands.
+                 */
                 OpenDBConnection();
+
+                #region select statement for table 1
+                /*
+                 * Select statement for table 1
+                 */
+                SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
+
+                /*
+                 * Run the command and get the results.
+                 */
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(leftContents);
-                CloseDBConnection();
+
+                /*
+                 * Dispose the sql adapter.
+                 */
                 da.Dispose();
-            }
-            catch
-            {
+                #endregion
 
-            }
+                #region select statement for table 2
+                /*
+                 * Select statement for table 2
+                 */
+                cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database));
 
-            //connection string for table 2
-            cmd = new SqlCommand("Select * from " + rightT, InitData(compareDB.server, compareDB.userid, compareDB.password, compareDB.database);
+                /*
+                 * Run the command and get the results.
+                 */
+                da = new SqlDataAdapter(cmd);
+                da.Fill(leftContents);
 
-            //get right contents
-            try
-            {
-                OpenDBConnection();
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(rightContents);
-                CloseDBConnection();
+                /*
+                 * Dispose the sql adapter.
+                 */
                 da.Dispose();
-            }
-            catch
-            {
+                #endregion
 
+                /*
+                 * Close the database connection.
+                 */
+                CloseDBConnection();
+            }
+            catch (Exception ex)
+            {
+                /*
+                 * Do something with the exception.
+                 */
             }
 
             //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
