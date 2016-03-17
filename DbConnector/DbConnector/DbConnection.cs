@@ -37,11 +37,20 @@ namespace DbConnector
             _ConnectionOpen = false;
         }
 
-        //execute pull into datatable
-        public DataTable PullData(bool hasJoins, Dictionary<string, string> leftPair, Dictionary<string, string> rightPair, List<string> columns, List<string> conditions)
+        /*
+         * Method Name: PullData
+         * Parameters: 
+         bool hasJoins -- indicates whether the select statement has joins
+         Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
+         List<string> columns -- list of columns to select.
+         List<string> conditions -- the where conditions of the statement.
+         * Return: DataTable PullData -- a datatable containing the pulled data
+         * Description: The method executes a query to a database based off a dynamically created select statement.
+         */
+        public DataTable PullData(bool hasJoins, Dictionary<string, string> tablePair, List<string> columns, List<string> conditions)
         {
             DataTable pulledContents = new DataTable();
-            SqlCommand cmd = new SqlCommand(buildSelect(hasJoins, leftPair, rightPair, columns, conditions), sourceConn);
+            SqlCommand cmd = new SqlCommand(buildSelect(hasJoins, tablePair, columns, conditions), sourceConn);
 
             try
             {
@@ -59,6 +68,15 @@ namespace DbConnector
             return pulledContents;
         }
 
+        /*
+         * Method Name: insertUpdate
+         * Parameters: 
+         string table -- table to be inserted into
+         DataTable data -- a datatable containing the data to be inserted.
+         char useMode -- sets the buildInsertUpdate function to either create an insert or update statement.
+         * Return: void
+         * Description: This method executes either an insert or update statement to a database.
+         */
         public void insertUpdate(string table, DataTable data, char useMode)
         {
             SqlCommand cmd = new SqlCommand(buildInsertUpdate(table, data, useMode), sourceConn);
@@ -75,25 +93,36 @@ namespace DbConnector
             }
         }
 
-        //build select statement.
-        private string buildSelect(bool hasJoins, Dictionary<string,string> leftPair, Dictionary<string, string> rightPair, List<string> columns, List<string> conditions)
+        /*
+         * Method Name: buildSelect
+         * Parameters: 
+         bool hasJoins -- indicates whether the select statement has joins
+         Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
+         List<string> columns -- list of columns to select.
+         List<string> conditions -- the where conditions of the statement.
+         * Return: void
+         * Description: The method dynamically creates a select statement based off the parameters it is passed.
+         */
+        private string buildSelect(bool hasJoins, Dictionary<string,string> tablePair, List<string> columns, List<string> conditions)
         {
+            //begin query
             string query = "select  ";
 
+            //
             foreach (string column in columns)
             {
                 query += column + ", ";
             }
             query = query.Remove(query.Length - 3);
 
-            query += " from " + leftPair.Keys.ElementAt(0) + " ";
+            query += " from " + tablePair.Keys.ElementAt(0) + " ";
 
             if (hasJoins)
             {
-                for (int i = 0; i <= leftPair.Count; i++)
+                for (int i = 0; i < tablePair.Count; i++)
                 {
-                    query += " joins " + rightPair.Keys.ElementAt(i) + " on " +
-                             leftPair.Values.ElementAt(i) + " = " + rightPair.Values.ElementAt(i);
+                    query += " joins " + tablePair.Keys.ElementAt(i + 1) + " on " +
+                             tablePair.Values.ElementAt(i) + " = " + tablePair.Values.ElementAt(i+1);
                 }
             }
 
@@ -109,7 +138,15 @@ namespace DbConnector
             return query;
         }
 
-        //build insert statement
+        /*
+         * Method Name: buildInsertUpdate
+         * Parameters: 
+         string table -- table to be inserted into
+         DataTable data -- a datatable containing the data to be inserted.
+         char useMode -- sets the buildInsertUpdate function to either create an insert or update statement.
+         * Return: void
+         * Description: This method builds an insert or update statement based off a Datatable.
+         */
         private string buildInsertUpdate(string table, DataTable data, char useMode)
         {
             string query = "";
@@ -339,6 +376,17 @@ namespace DbConnector
             return missingContents;
         }
 
+        /*
+         * Method Name: checkUpdateRows
+         * Parameters: 
+         *  DbConnectorInfo compareDB -- Connection info for second database
+         *  string leftT -- Left table to be compared against
+         *  string leftID -- right table to be compared against
+         *  string rightT -- table ID
+         *  string rightID -- table ID
+         * Return: DataTable missingContents -- contents to be synced over
+         * Description: This will compare two tables in two databases and find asyncronus data between to two, passing back to rows to be updated.
+         */
         private DataTable checkUpdateRows(SqlConnection destinationConn, string leftT, string leftID, string rightT, string rightID)
         {
             DataTable leftContents = new DataTable();
