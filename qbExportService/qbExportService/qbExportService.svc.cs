@@ -7,7 +7,8 @@ using System.Text;
 
 using System.Diagnostics; //EventLog
 using System.Collections; //ArrayList
-using System.Text.RegularExpressions; //Regex
+using System.Text.RegularExpressions;
+using System.Xml; //Regex
 
 namespace qbExportService
 {
@@ -130,11 +131,41 @@ namespace qbExportService
 
         private ArrayList buildRequest()
         {
+            string strRequestXML = "";
+            XmlDocument inputXMLDocument = null;
             ArrayList req = new ArrayList();
 
             /*
              * TODO: Figure out how to build a proper request(s).
              */
+            /* 
+             * InvoiceQuery
+             * Place reference for below code here...
+             */
+            inputXMLDocument = new XmlDocument();
+            inputXMLDocument.AppendChild(inputXMLDocument.CreateXmlDeclaration("1.0", null, null));
+            inputXMLDocument.AppendChild(inputXMLDocument.CreateProcessingInstruction("qbxml", "version=\"4.0\""));
+
+            XmlElement qbXML = inputXMLDocument.CreateElement("QBXML");
+            inputXMLDocument.AppendChild(qbXML);
+            XmlElement qbXMLMsgsRq = inputXMLDocument.CreateElement("QBXMLMsgsRq");
+            qbXML.AppendChild(qbXMLMsgsRq);
+            qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
+            XmlElement invoiceQueryRq = inputXMLDocument.CreateElement("InvoiceQueryRq");
+            qbXMLMsgsRq.AppendChild(invoiceQueryRq);
+            invoiceQueryRq.SetAttribute("requestID", "2");
+            XmlElement maxReturned = inputXMLDocument.CreateElement("MaxReturned");
+            invoiceQueryRq.AppendChild(maxReturned).InnerText = "1";
+
+            strRequestXML = inputXMLDocument.OuterXml;
+            req.Add(strRequestXML);
+
+            // Clean up
+            strRequestXML = "";
+            inputXMLDocument = null;
+            qbXML = null;
+            qbXMLMsgsRq = null;
+            maxReturned = null;
 
             return req;
         }
