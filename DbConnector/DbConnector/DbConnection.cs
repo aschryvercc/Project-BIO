@@ -16,11 +16,6 @@ namespace DbConnector
         private DbConnectorInfo sourceDbConnectorInfo; //The source connection information
         private SqlConnection sourceConn = null;  //The source database connection
         private string connectionString = "";   //connection string to a database when connecting the source or destination
-        //private string sourceDBName = "";   //Name of the source database
-        //private string destinationDBName = "";  //Name of the destination database
-        //private List<string> sourceTables = new List<string>(); //List of the names of the source database's tables
-        //private List<string> destinationTables = new List<string>();    //List of the names of the destination database's tables
-
         private bool _ConnectionOpen;
         public bool ConnectionOpen
         {
@@ -44,7 +39,7 @@ namespace DbConnector
          List<string> columns -- list of columns to select.
          List<string> conditions -- the where conditions of the statement.
          * Return: DataTable PullData -- a datatable containing the pulled data
-         * Description: The method executes a query to a database based off a dynamically created select statement.
+         * Description: The method executes a query to a database based off a dynamically created select statement from a group of joined tables.
          */
         public DataTable PullData(Dictionary<string, string> tablePair, List<string> columns, List<string> conditions)
         {
@@ -53,15 +48,13 @@ namespace DbConnector
 
             try
             {
-                //OpenDBConnection();table
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(pulledContents);
-                //CloseDBConnection();
                 da.Dispose();
             }
             catch (Exception ex)
             {
-                //Add exception handling...
+                throw (ex); 
             }
 
             return pulledContents;
@@ -71,11 +64,11 @@ namespace DbConnector
          * Method Name: PullData
          * Parameters: 
          bool hasJoins -- indicates whether the select statement has joins
-         Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
+        String Table -- The table to be pulled from.
          List<string> columns -- list of columns to select.
          List<string> conditions -- the where conditions of the statement.
          * Return: DataTable PullData -- a datatable containing the pulled data
-         * Description: The method executes a query to a database based off a dynamically created select statement.
+         * Description: The method executes a query to a database based off a dynamically created select statement from a single table.
          */
         public DataTable PullData(string table, List<string> columns, List<string> conditions)
         {
@@ -84,15 +77,13 @@ namespace DbConnector
 
             try
             {
-                //OpenDBConnection();
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(pulledContents);
-                //CloseDBConnection();
                 da.Dispose();
             }
             catch (Exception ex)
             {
-                //Add exception handling...
+                throw (ex);
             }
 
             return pulledContents;
@@ -113,25 +104,22 @@ namespace DbConnector
 
             try
             {
-                //OpenDBConnection();
                 cmd.ExecuteNonQuery();
-                //CloseDBConnection();
             }
-            catch
+            catch(Exception ex)
             {
-                //Add exception handling...
+                throw (ex);
             }
         }
 
         /*
          * Method Name: buildSelect
          * Parameters: 
-         bool hasJoins -- indicates whether the select statement has joins
          Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
          List<string> columns -- list of columns to select.
          List<string> conditions -- the where conditions of the statement.
          * Return: void
-         * Description: The method dynamically creates a select statement based off the parameters it is passed.
+         * Description: The method dynamically creates a select statement based off the parameters it is passed for multiple joined tables.
          */
         private string buildSelect(Dictionary<string,string> tablePair, List<string> columns, List<string> conditions)
         {
@@ -153,14 +141,17 @@ namespace DbConnector
                 query += "* ";
             }
 
+            //add first table to join
             query += " from " + tablePair.Keys.ElementAt(0) + " ";
             
+            //incrememntally add remaining tables and comparer.
             for (int i = 0; i < tablePair.Count; i++)
             {
                 query += " joins " + tablePair.Keys.ElementAt(i + 1) + " on " +
                             tablePair.Values.ElementAt(i) + " = " + tablePair.Values.ElementAt(i+1);
             }
 
+            //add conditions if applicable.
             if (conditions != null)
             {
                 query += " where ";
@@ -179,12 +170,11 @@ namespace DbConnector
         /*
          * Method Name: buildSelect
          * Parameters: 
-         bool hasJoins -- indicates whether the select statement has joins
          Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
          List<string> columns -- list of columns to select.
          List<string> conditions -- the where conditions of the statement.
          * Return: void
-         * Description: The method dynamically creates a select statement based off the parameters it is passed.
+         * Description: The method dynamically creates a select statement based off the parameters it is passed for multiple joined tables.
          */
         private string buildSelect(string table, List<string> columns, List<string> conditions)
         {
@@ -200,6 +190,7 @@ namespace DbConnector
                 }
                 query = query.Remove(query.Length - 3);
             }
+
             //if the list is null, assume select all columns
             else
             {
@@ -208,6 +199,7 @@ namespace DbConnector
 
             query += " from " + table;
 
+            //add conditions if applicable.
             if (conditions != null)
             {
                 query += " where ";
@@ -215,6 +207,7 @@ namespace DbConnector
                 {
                     query += conditions[i] + ", ";
                 }
+                query = query.Remove(query.Length - 3);
             }
 
             query += ";";
@@ -290,9 +283,7 @@ namespace DbConnector
             }
             catch (SqlException ex)
             {
-                /*
-                 * TODO: Handle exception.
-                 */
+                throw (ex);
             }
 
             //Return the new MySql Connection
@@ -381,10 +372,6 @@ namespace DbConnector
 
             try
             {
-                /*
-                * Open the database for sql commands.
-                */
-                //OpenDBConnection();
 
                 #region select statement for table 1
                 /*
@@ -425,13 +412,10 @@ namespace DbConnector
                 /*
                  * Close the database connection.
                  */
-                //CloseDBConnection();
             }
             catch (Exception ex)
             {
-                /*
-                 * Do something with the exception.
-                 */
+                throw (ex);
             }
 
             //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
@@ -480,10 +464,6 @@ namespace DbConnector
 
             try
             {
-                /*
-                 * Open the database for sql commands.
-                 */
-                //OpenDBConnection();
 
                 #region select statement for table 1
                 /*
@@ -520,17 +500,10 @@ namespace DbConnector
                  */
                 da.Dispose();
                 #endregion
-
-                /*
-                 * Close the database connection.
-                 */
-                //CloseDBConnection();
             }
             catch (Exception ex)
             {
-                /*
-                 * Do something with the exception.
-                 */
+                throw (ex);
             }
 
             //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
@@ -564,7 +537,6 @@ namespace DbConnector
                     }
                 }
             }
-
             return missingContents;
         }
 
