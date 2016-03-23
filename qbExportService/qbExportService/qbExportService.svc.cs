@@ -135,12 +135,8 @@ namespace qbExportService
             XmlDocument inputXMLDocument = null;
             ArrayList req = new ArrayList();
 
-            /*
-             * TODO: Figure out how to build a proper request(s).
-             */
             /* 
              * InvoiceQuery
-             * Place reference for below code here...
              */
             inputXMLDocument = new XmlDocument();
             inputXMLDocument.AppendChild(inputXMLDocument.CreateXmlDeclaration("1.0", null, null));
@@ -166,6 +162,135 @@ namespace qbExportService
             qbXML = null;
             qbXMLMsgsRq = null;
             maxReturned = null;
+
+            /*
+             * InvoiceAdd
+             */
+            inputXMLDocument = new XmlDocument();
+            inputXMLDocument.AppendChild(inputXMLDocument.CreateXmlDeclaration("1.0", null, null));
+            inputXMLDocument.AppendChild(inputXMLDocument.CreateProcessingInstruction("qbxml", "version=\"4.0\""));
+
+            qbXML = inputXMLDocument.CreateElement("QBXML");
+            inputXMLDocument.AppendChild(qbXML);
+
+            qbXMLMsgsRq = inputXMLDocument.CreateElement("QBXMLMsgsRq");
+            qbXML.AppendChild(qbXMLMsgsRq);
+            qbXMLMsgsRq.SetAttribute("onError", "stopOnError");
+
+            XmlElement invoiceAddRq = inputXMLDocument.CreateElement("InvoiceAddRq");
+            qbXMLMsgsRq.AppendChild(invoiceAddRq);
+            invoiceAddRq.SetAttribute("requestID", "2");
+
+            XmlElement invoiceAdd = inputXMLDocument.CreateElement("InvoiceAdd");
+            invoiceAddRq.AppendChild(invoiceAdd);
+
+            XmlElement customerRef = inputXMLDocument.CreateElement("CustomerRef");
+            invoiceAdd.AppendChild(customerRef);
+
+            XmlElement listID = inputXMLDocument.CreateElement("ListID");
+            customerRef.AppendChild(listID).InnerText = "90001-1263558758";
+            XmlElement fullName = inputXMLDocument.CreateElement("FullName");
+            customerRef.AppendChild(fullName).InnerText = "Testy McTestFace";
+
+            XmlElement txnDate = inputXMLDocument.CreateElement("TxnDate");
+            invoiceAdd.AppendChild(txnDate).InnerText = "2016-03-15";
+
+            XmlElement refNumber = inputXMLDocument.CreateElement("RefNumeber");
+            invoiceAdd.AppendChild(refNumber).InnerText = "21011";
+
+            XmlElement billAddress = inputXMLDocument.CreateElement("BillAddress");
+            invoiceAdd.AppendChild(billAddress);
+            XmlElement addr1 = inputXMLDocument.CreateElement("Addr1");
+            billAddress.AppendChild(addr1).InnerText = "123 Test Road";
+            XmlElement addr2 = inputXMLDocument.CreateElement("Addr2");
+            billAddress.AppendChild(addr2).InnerText = "456 Face Road";
+            XmlElement addr3 = inputXMLDocument.CreateElement("Addr3");
+            billAddress.AppendChild(addr3);
+            XmlElement city = inputXMLDocument.CreateElement("City");
+            billAddress.AppendChild(city).InnerText = "Testing";
+            XmlElement state = inputXMLDocument.CreateElement("State");
+            billAddress.AppendChild(state).InnerText = "State";
+            XmlElement postalCode = inputXMLDocument.CreateElement("PostalCode");
+            billAddress.AppendChild(postalCode).InnerText = "06279";
+            XmlElement country = inputXMLDocument.CreateElement("Country");
+            billAddress.AppendChild(country).InnerText = "Canada";
+
+            XmlElement shipAddress = inputXMLDocument.CreateElement("ShipAddress");
+            invoiceAdd.AppendChild(shipAddress);
+            addr1 = inputXMLDocument.CreateElement("Addr1");
+            shipAddress.AppendChild(addr1).InnerText = "123 Test2 Road";
+            addr2 = inputXMLDocument.CreateElement("Addr2");
+            shipAddress.AppendChild(addr2).InnerText = "456 Face2 Road";
+            addr3 = inputXMLDocument.CreateElement("Addr3");
+            shipAddress.AppendChild(addr3);
+            city = inputXMLDocument.CreateElement("City");
+            shipAddress.AppendChild(city).InnerText = "Testing2";
+            state = inputXMLDocument.CreateElement("State");
+            shipAddress.AppendChild(state).InnerText = "State2";
+            postalCode = inputXMLDocument.CreateElement("PostalCode");
+            shipAddress.AppendChild(postalCode).InnerText = "01234";
+            country = inputXMLDocument.CreateElement("Country");
+            shipAddress.AppendChild(country).InnerText = "Canada";
+
+            XmlElement termsRef = inputXMLDocument.CreateElement("TermsRef");
+            invoiceAdd.AppendChild(termsRef);
+            fullName = inputXMLDocument.CreateElement("FullName");
+            termsRef.AppendChild(fullName).InnerText = "Mr. Krabs";
+
+            XmlElement salesRepRef = inputXMLDocument.CreateElement("SalesRepRef");
+            invoiceAdd.AppendChild(salesRepRef);
+            fullName = inputXMLDocument.CreateElement("FullName");
+            termsRef.AppendChild(fullName).InnerText = "Plankton";
+
+            XmlElement memo = inputXMLDocument.CreateElement("Memo");
+            invoiceAdd.AppendChild(memo).InnerText = "Memo McMemoFace";
+
+            XmlElement invoiceLineAdd = inputXMLDocument.CreateElement("InvoiceLineAdd");
+            invoiceAdd.AppendChild(invoiceLineAdd);
+
+            XmlElement itemRef = inputXMLDocument.CreateElement("ItemRef");
+            invoiceLineAdd.AppendChild(itemRef);
+            fullName = inputXMLDocument.CreateElement("FullName");
+            itemRef.AppendChild(fullName).InnerText = "Tester";
+            XmlElement desc = inputXMLDocument.CreateElement("Desc");
+            itemRef.AppendChild(desc).InnerText = "Tester";
+            XmlElement quantity = inputXMLDocument.CreateElement("Quantity");
+            itemRef.AppendChild(quantity).InnerText = "4.00000";
+            XmlElement rate = inputXMLDocument.CreateElement("Rate");
+            itemRef.AppendChild(rate).InnerText = "25.00000";
+
+            strRequestXML = inputXMLDocument.OuterXml;
+            req.Add(strRequestXML);
+
+            // Clean up
+            strRequestXML = "";
+            inputXMLDocument = null;
+            qbXML = null;
+            qbXMLMsgsRq = null;
+            invoiceAddRq = null;
+            invoiceAdd = null;
+            customerRef = null;
+            listID = null;
+            fullName = null;
+            txnDate = null;
+            refNumber = null;
+            billAddress = null;
+            addr1 = null;
+            addr2 = null;
+            addr3 = null;
+            city = null;
+            state = null;
+            postalCode = null;
+            country = null;
+            shipAddress = null;
+            termsRef = null;
+            salesRepRef = null;
+            memo = null;
+            invoiceLineAdd = null;
+            itemRef = null;
+            desc = null;
+            quantity = null;
+            rate = null;
 
             return req;
         }
@@ -351,7 +476,7 @@ namespace qbExportService
          * 
          * Description: Initializes the application for logging events.
          */
-        public string connectionError(string ticket, string result, string msg)
+        public string connectionError(string ticket, string hresult, string msg)
         {
             string resultValue = null;
             string eventText = "";
@@ -370,7 +495,7 @@ namespace qbExportService
             eventText += "WebMethod        : connectionError()\r\n\r\n";
             eventText += "Parameters       :\r\n";
             eventText += "string ticket = " + ticket + "\r\n";
-            eventText += "string result = " + result + "\r\n";
+            eventText += "string result = " + hresult + "\r\n";
             eventText += "string msg = " + msg + "\r\n";
             eventText += "\r\n";
 
@@ -382,17 +507,17 @@ namespace qbExportService
             /*
              * Determine error code.
              */
-            if (result.Trim().Equals(QB_ERROR_WHEN_PARSING))
+            if (hresult.Trim().Equals(QB_ERROR_WHEN_PARSING))
             {
-
+                resultValue = "DONE";
             }
-            else if (result.Trim().Equals(QB_COULDNT_ACCESS_QB))
+            else if (hresult.Trim().Equals(QB_COULDNT_ACCESS_QB))
             {
-
+                resultValue = "DONE";
             }
-            else if (result.Trim().Equals(QB_UNEXPECTED_ERROR))
+            else if (hresult.Trim().Equals(QB_UNEXPECTED_ERROR))
             {
-
+                resultValue = "DONE";
             }
             else
             {
@@ -476,9 +601,13 @@ namespace qbExportService
          * 
          * Returns: int resultValue
          * 
-         * Description: ...
+         * Description: Returns the data request response from QuickBooks or QuickBooks POS.
+         * A positive integer less than 100 represents the percentage of work completed. A value of 1
+         * means one percent complete, a value of 100 means 100 percent complete--there is no more
+         * work. A negative value means an error has occurred and the Web Connector responds to
+         * this with a getLastError call. The negative value could be used as a custom error code
          */
-        public int receiveResponseXML(string ticket, string response, string result, string msg)
+        public int receiveResponseXML(string ticket, string response, string hresult, string msg)
         {
             int resultValue = 0;
             int requestCount = 0;
@@ -494,14 +623,14 @@ namespace qbExportService
             eventText += "Parameters       :\r\n";
             eventText += "string ticket = " + ticket + "\r\n";
             eventText += "string response = " + response + "\r\n";
-            eventText += "string result = " + result + "\r\n";
+            eventText += "string result = " + hresult + "\r\n";
             eventText += "string msg = " + msg + "\r\n";
             eventText += "\r\n";
 
             /*
              * When a error occurs, return a error code in the form of a -ve int.
              */ 
-            if (!result.ToString().Equals(""))
+            if (!hresult.ToString().Equals(""))
             {
                 resultValue = -101;
             }
@@ -514,6 +643,14 @@ namespace qbExportService
                 totalRequests = request.Count;
                 requestCount = Convert.ToInt32(Context.Current.Counter);
 
+                //Do something with Quick Books response here..
+
+                /*
+                 * Set up the return value:
+                 * Greater than zero  = There are more request to send
+                 * 100 = Done. no more request to send
+                 * Less than zero  = Custom Error codes
+                 */
                 percentage = (requestCount * 100) / totalRequests;
                 
                 if (percentage >= 100)
@@ -550,7 +687,14 @@ namespace qbExportService
          * 
          * Returns: string resultValue
          * 
-         * Description: ...
+         * Description: The web connector’s invitation to the web service to send a request. 
+         * After receiving the session token (ticket) returned from the web service in response to the
+         * authenticate call, the web connector establishes a connection to QuickBooks using QBXML
+         * Request Processor. The web connector then calls sendRequestXML, supplying in that call
+         * certain information about the QuickBooks or QuickBooks POS connection that the web
+         * connector has established.
+         * If there is a problem establishing the connection the web connector does not call
+         * sendRequestXML, but instead calls connectionError.
          */
         public string sendRequestXML(string ticket, string response, string companyFileName,
                                      string qbXMLCountry, int qbXMLMajorVersion, int qbXMLMinorVersion)
@@ -580,6 +724,7 @@ namespace qbExportService
             eventText += "string qbXMLMinorVersion = " + qbXMLMinorVersion + "\r\n";
             eventText += "\r\n";
 
+            //Send Quick Books a message.
             if (requestCount < totalRequests)
             {
                 resultValue = request[requestCount].ToString();
