@@ -15,7 +15,6 @@ namespace DbConnector
         //tracks connection info
         private DbConnectorInfo sourceDbConnectorInfo; //The source connection information
         private SqlConnection sourceConn = null;  //The source database connection
-        private SqlDataAdapter dbDataAdapter = null;  //A data adapter used to bridge the data to a data set object
         private string connectionString = "";   //connection string to a database when connecting the source or destination
         //private string sourceDBName = "";   //Name of the source database
         //private string destinationDBName = "";  //Name of the destination database
@@ -47,10 +46,41 @@ namespace DbConnector
          * Return: DataTable PullData -- a datatable containing the pulled data
          * Description: The method executes a query to a database based off a dynamically created select statement.
          */
-        public DataTable PullData(bool hasJoins, Dictionary<string, string> tablePair, List<string> columns, List<string> conditions)
+        public DataTable PullData(Dictionary<string, string> tablePair, List<string> columns, List<string> conditions)
         {
             DataTable pulledContents = new DataTable();
-            SqlCommand cmd = new SqlCommand(buildSelect(hasJoins, tablePair, columns, conditions), sourceConn);
+            SqlCommand cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), sourceConn);
+
+            try
+            {
+                //OpenDBConnection();table
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(pulledContents);
+                //CloseDBConnection();
+                da.Dispose();
+            }
+            catch (Exception ex)
+            {
+                //Add exception handling...
+            }
+
+            return pulledContents;
+        }
+
+        /*
+         * Method Name: PullData
+         * Parameters: 
+         bool hasJoins -- indicates whether the select statement has joins
+         Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
+         List<string> columns -- list of columns to select.
+         List<string> conditions -- the where conditions of the statement.
+         * Return: DataTable PullData -- a datatable containing the pulled data
+         * Description: The method executes a query to a database based off a dynamically created select statement.
+         */
+        public DataTable PullData(string table, List<string> columns, List<string> conditions)
+        {
+            DataTable pulledContents = new DataTable();
+            SqlCommand cmd = new SqlCommand(buildSelect(table, columns, conditions), sourceConn);
 
             try
             {
@@ -103,34 +133,88 @@ namespace DbConnector
          * Return: void
          * Description: The method dynamically creates a select statement based off the parameters it is passed.
          */
-        private string buildSelect(bool hasJoins, Dictionary<string,string> tablePair, List<string> columns, List<string> conditions)
+        private string buildSelect(Dictionary<string,string> tablePair, List<string> columns, List<string> conditions)
         {
             //begin query
             string query = "select  ";
 
-            //
-            foreach (string column in columns)
+            //add columns to be selected
+            if (columns != null)
             {
-                query += column + ", ";
+                foreach (string column in columns)
+                {
+                    query += column + ", ";
+                }
+                query = query.Remove(query.Length - 3);
             }
-            query = query.Remove(query.Length - 3);
+            //if the list is null, assume select all columns
+            else
+            {
+                query += "* ";
+            }
 
             query += " from " + tablePair.Keys.ElementAt(0) + " ";
-
-            if (hasJoins)
+            
+            for (int i = 0; i < tablePair.Count; i++)
             {
-                for (int i = 0; i < tablePair.Count; i++)
+                query += " joins " + tablePair.Keys.ElementAt(i + 1) + " on " +
+                            tablePair.Values.ElementAt(i) + " = " + tablePair.Values.ElementAt(i+1);
+            }
+
+            if (conditions != null)
+            {
+                query += " where ";
+
+                for (int i = 0; i <= conditions.Count; i++)
                 {
-                    query += " joins " + tablePair.Keys.ElementAt(i + 1) + " on " +
-                             tablePair.Values.ElementAt(i) + " = " + tablePair.Values.ElementAt(i+1);
+                    query += conditions[i] + ", ";
                 }
             }
 
-            query += "where ";
+            query += ";";
 
-            for (int i = 0; i <= conditions.Count; i++)
+            return query;
+        }
+
+        /*
+         * Method Name: buildSelect
+         * Parameters: 
+         bool hasJoins -- indicates whether the select statement has joins
+         Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
+         List<string> columns -- list of columns to select.
+         List<string> conditions -- the where conditions of the statement.
+         * Return: void
+         * Description: The method dynamically creates a select statement based off the parameters it is passed.
+         */
+        private string buildSelect(string table, List<string> columns, List<string> conditions)
+        {
+            //begin query
+            string query = "select  ";
+
+            //add columns to be selected
+            if (columns != null)
             {
-                query += conditions[i] + ", ";
+                foreach (string column in columns)
+                {
+                    query += column + ", ";
+                }
+                query = query.Remove(query.Length - 3);
+            }
+            //if the list is null, assume select all columns
+            else
+            {
+                query += "* ";
+            }
+
+            query += " from " + table;
+
+            if (conditions != null)
+            {
+                query += " where ";
+                for (int i = 0; i <= conditions.Count; i++)
+                {
+                    query += conditions[i] + ", ";
+                }
             }
 
             query += ";";
@@ -194,7 +278,7 @@ namespace DbConnector
         {
             //Setup the connection string
             SqlConnection conn = null;
-            connectionString = @"server=" + server + ";userid=" + userid + ";password=" + password + ";database=" + database;
+            connectionString = @"server=" + server + ";user id=" + userid + ";password=" + password + ";database=" + database;
 
             //Try to connect to the database based on the connection string
             //Also fill the table list immediately since the database is currently selected
