@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<QBWCXML>
+  
+  <!--
+  This is displayed to the user in the Web Connector GUI
+  -->
+  <AppName>HTTPSqbExportService</AppName>
+  
+  <!--
+  Must contain a valid URL to a valid page which 
+  returns a 200 OK HTTP response when visited.
+  -->
+  <AppID></AppID>
+  
+  <!--
+  A short description for the application.
+  -->
+  <AppDescription>This service will query the invoices of a client, and add any invoices missing.</AppDescription>
+  
+  <!--
+  Support page for the application.
+  -->
+  <AppSupport></AppSupport>
+  
+  <!--
+  Something to do with a username. Probably for the client.
+  -->
+  <UserName>username</UserName>
+  
+  <!--
+  Same as Below.
+  -->
+  <OwnerID>{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}</OwnerID> 
+  
+  <!--
+  You can make this up as long as it follows 
+  the GUID format (uppercase HEX chars only!): 
+  {6904A826-7368-11DC-8317-F7AD55D89593}. 
+  It has something to do with DataExt elements; 
+  most simple integrations can just make this up.
+  -->
+  <FileID>{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}</FileID>
+  <!--
+  Specifies the type of Quickbooks you want to connect 
+  to with the web connector (ie “QBFS” or “QBPOS”)
+  -->
+	<QBType>QBFS</QBType>
+  
+  <!--
+  This is an optional element, use this to 
+  schedule the Web Connector to run every so often 
+  automatically.
+  -->
+  <Scheduler>
+    <RunEveryNMinutes>10</RunEveryNMinutes> <!---->
+  </Scheduler>
+  
+  <!--
+  If you set this to true, your application 
+  will not be able to add, modify, or delete data in QuickBooks.
+  -->
+  <IsReadOnly>false</IsReadOnly>
+</QBWCXML>
