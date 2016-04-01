@@ -281,7 +281,7 @@ namespace DbConnector
                 conn = new SqlConnection(connectionString);
                 conn.Open();
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 throw (ex);
             }
@@ -363,7 +363,7 @@ namespace DbConnector
          * Return: DataTable missingContents -- contents to be synced over
          * Description: This will compare two tables in two databases and find any missing rows.
          */
-        private DataTable checkMissingRows(SqlConnection destinationConn, string leftT, string leftID, string rightT, string rightID)
+        public DataTable checkMissingRows(DbConnectorInfo destinationConnInfo, string leftT, string leftID, string rightT, string rightID)
         {
             DataTable leftContents = new DataTable();
             DataTable rightContents = new DataTable();
@@ -395,7 +395,8 @@ namespace DbConnector
                 /*
                  * Select statement for table 2
                  */
-                cmd = new SqlCommand("Select * from " + rightT, destinationConn);
+                cmd = new SqlCommand("Select * from " + rightT, InitData(destinationConnInfo.server, 
+                    destinationConnInfo.userid,destinationConnInfo.password, destinationConnInfo.database));
 
                 /*
                  * Run the command and get the results.
@@ -445,98 +446,75 @@ namespace DbConnector
         }
 
         /*
-         * Method Name: checkUpdateRows
-         * Parameters: 
-         *  DbConnectorInfo compareDB -- Connection info for second database
-         *  string leftT -- Left table to be compared against
-         *  string leftID -- right table to be compared against
-         *  string rightT -- table ID
-         *  string rightID -- table ID
-         * Return: DataTable missingContents -- contents to be synced over
-         * Description: This will compare two tables in two databases and find asyncronus data between to two, passing back to rows to be updated.
+         * Method Name: updateLeft
+         * Parameters:
+         * Description: Pulls updated row information from mgmt database, pulls those changes from the left database and pushes them to the right.
          */
-        private DataTable checkUpdateRows(SqlConnection destinationConn, string leftT, string leftID, string rightT, string rightID)
+        public DataTable updateLeft(DbConnectorInfo destinationConn, DbConnectorInfo mgmtDB, List<string> whereClauses, string leftTable, string rightTable)
         {
-            DataTable leftContents = new DataTable();
-            DataTable rightContents = new DataTable();
+            DataTable markedRows = new DataTable();
             DataTable missingContents = new DataTable();
-            bool rowPresent = false;
-
+            List<string> rowsToFind = new List<string>();
+            SqlCommand cmd = new SqlCommand(buildSelect("updateLog", null, whereClauses), InitData(mgmtDB.server, mgmtDB.userid, mgmtDB.password, mgmtDB.database));
+            
+            //get data from mgmt database
             try
             {
-
-                #region select statement for table 1
-                /*
-                 * Select statement for table 1
-                 */
-                SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
-
-                /*
-                 * Run the command and get the results.
-                 */
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(leftContents);
-
-                /*
-                 * Dispose the sql adapter.
-                 */
+                da.Fill(markedRows);
                 da.Dispose();
-                #endregion
-
-                #region select statement for table 2
-                /*
-                 * Select statement for table 2
-                 */
-                cmd = new SqlCommand("Select * from " + rightT, destinationConn);
-
-                /*
-                 * Run the command and get the results.
-                 */
-                da = new SqlDataAdapter(cmd);
-                da.Fill(leftContents);
-
-                /*
-                 * Dispose the sql adapter.
-                 */
-                da.Dispose();
-                #endregion
             }
             catch (Exception ex)
             {
                 throw (ex);
             }
 
-            //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
-
-            //iterate left side.
-            foreach (DataRow leftRow in leftContents.Rows)
+            //translate into where clauses.
+            foreach (DataRow i in markedRows.Rows)
             {
-                //iterate right side.
-                foreach (DataRow rightRow in rightContents.Rows)
+                string clauseToAdd = "";
+                if (i == markedRows.Rows[0])
                 {
-                    //iterate through fields
-                    List<string> leftVals = new List<string>();
-                    List<string> rightVals = new List<string>();
-
-                    //add all fields to seperate lists for comparison.
-                    foreach (string value in leftRow.ItemArray)
-                    {
-                        leftVals.Add(value);
-                    }
-                    foreach (string value in rightRow.ItemArray)
-                    {
-                        rightVals.Add(value);
-                    }
-                    //iterate through list, if they do not match, an update is required and the data should be added to be carried over.
-                    for (int i = 0; i <= leftVals.Count; i++)
-                    {
-                        if (leftVals[i] != rightVals[i])
-                        {
-                            missingContents.Rows.Add(leftRow);
-                        }
-                    }
+                    clauseToAdd = i.Field<string>("rowName") + " = " + i.Field<string>("rowKey");
                 }
+                else
+                {
+                    clauseToAdd = i.Field<string>("rowKey");
+                }
+                if (i != markedRows.Rows[markedRows.Rows.Count])
+                {
+                    clauseToAdd += " || ";
+                }
+                rowsToFind.Add(clauseToAdd);
             }
+
+            //pull missing data
+            cmd = new SqlCommand(buildSelect(leftTable, null, rowsToFind), sourceConn);
+
+            try
+            {
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(missingContents);
+                da.Dispose();
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+
+            //push new data
+            cmd = new SqlCommand(buildInsertUpdate(rightTable, missingContents, 'u'), 
+                InitData(destinationConn.server, destinationConn.userid, destinationConn.password, destinationConn.database));
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+
             return missingContents;
         }
 
