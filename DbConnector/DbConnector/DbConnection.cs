@@ -13,22 +13,31 @@ namespace DbConnector
     public class DbConnection
     {
         //tracks connection info
-        private DbConnectorInfo sourceDbConnectorInfo; //The source connection information
-        private SqlConnection sourceConn = null;  //The source database connection
+        private DbConnectorInfo sourceDbConnectorInfoLeft; //The source connection information
+        private DbConnectorInfo sourceDbConnectorInfoRight; //The source connection information
+        private SqlConnection sourceConnLeft = null;  //The source database connection
+        private SqlConnection sourceConnRight = null;  //The source database connection
         private string connectionString = "";   //connection string to a database when connecting the source or destination
-        private bool _ConnectionOpen;
-        public bool ConnectionOpen
+        private bool _ConnectionOpenLeft;
+        private bool _ConnectionOpenRight;
+        public bool ConnectionOpenLeft
         {
-            get { return _ConnectionOpen; }
+            get { return _ConnectionOpenLeft; }
+        }
+        public bool ConnectionOpenRight
+        {
+            get { return _ConnectionOpenRight; }
         }
 
         /*
          * Constructor
          */
-        public DbConnection(DbConnectorInfo connectionInfo)
+        public DbConnection(DbConnectorInfo connectionInfo1, DbConnectorInfo connectionInfo2)
         {
-            sourceDbConnectorInfo = connectionInfo;
-            _ConnectionOpen = false;
+            sourceDbConnectorInfoLeft = connectionInfo1;
+            sourceDbConnectorInfoRight = connectionInfo2;
+            _ConnectionOpenLeft = false;
+            _ConnectionOpenRight = false;
         }
 
         /*
@@ -41,10 +50,17 @@ namespace DbConnector
          * Return: DataTable PullData -- a datatable containing the pulled data
          * Description: The method executes a query to a database based off a dynamically created select statement from a group of joined tables.
          */
-        public DataTable PullData(Dictionary<string, string> tablePair, List<string> columns, List<string> conditions)
+        public DataTable PullData(Dictionary<string, string> tablePair, List<string> columns, List<string> conditions, char cond)
         {
             DataTable pulledContents = new DataTable();
-            SqlCommand cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), sourceConn);
+            SqlCommand cmd;
+
+            if (cond == 'L')
+                cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), sourceConnLeft);
+            else if (cond == 'R')
+                cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), sourceConnRight);
+            else
+                return null;
 
             try
             {
@@ -70,10 +86,17 @@ namespace DbConnector
          * Return: DataTable PullData -- a datatable containing the pulled data
          * Description: The method executes a query to a database based off a dynamically created select statement from a single table.
          */
-        public DataTable PullData(string table, List<string> columns, List<string> conditions)
+        public DataTable PullData(string table, List<string> columns, List<string> conditions, char cond)
         {
             DataTable pulledContents = new DataTable();
-            SqlCommand cmd = new SqlCommand(buildSelect(table, columns, conditions), sourceConn);
+            SqlCommand cmd;
+
+            if (cond == 'L')
+                cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), sourceConnLeft);
+            else if (cond == 'R')
+                cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), sourceConnRight);
+            else
+                return null;
 
             try
             {
@@ -98,9 +121,17 @@ namespace DbConnector
          * Return: void
          * Description: This method executes either an insert or update statement to a database.
          */
-        public void insertUpdate(string table, DataTable data, char useMode)
+        public void insertUpdate(string table, DataTable data, char useMode, char cond)
         {
-            SqlCommand cmd = new SqlCommand(buildInsertUpdate(table, data, useMode), sourceConn);
+            SqlCommand cmd;
+
+
+            if (cond == 'L')
+                cmd = new SqlCommand(buildInsertUpdate(table, data, useMode), sourceConnLeft);
+            else if (cond == 'R')
+                cmd = new SqlCommand(buildInsertUpdate(table, data, useMode), sourceConnRight);
+            else
+                cmd = null;
 
             try
             {
@@ -297,13 +328,24 @@ namespace DbConnector
          * Description: The method will open a connection to a database and get the 
          * database information used to create the connection.
          */
-        public void OpenDBConnection()
+        public void OpenDBConnectionLeft()
         {
             //If logging into the source database connect to it
-            sourceConn = InitData(sourceDbConnectorInfo.server, sourceDbConnectorInfo.userid, 
-                                  sourceDbConnectorInfo.password, sourceDbConnectorInfo.database);
+            sourceConnLeft = InitData(sourceDbConnectorInfoLeft.server, sourceDbConnectorInfoLeft.userid, 
+                                  sourceDbConnectorInfoLeft.password, sourceDbConnectorInfoLeft.database);
 
-            _ConnectionOpen = true;
+            _ConnectionOpenLeft = true;
+            //sourceTables = ExtractTables(sourceConn);
+            //sourceDBName = sourceDbConnectorInfo.database;
+        }
+
+        public void OpenDBConnectionRight()
+        {
+            //If logging into the source database connect to it
+            sourceConnRight = InitData(sourceDbConnectorInfoRight.server, sourceDbConnectorInfoRight.userid,
+                                  sourceDbConnectorInfoRight.password, sourceDbConnectorInfoRight.database);
+
+            _ConnectionOpenRight = true;
             //sourceTables = ExtractTables(sourceConn);
             //sourceDBName = sourceDbConnectorInfo.database;
         }
@@ -314,19 +356,31 @@ namespace DbConnector
          * Return: void
          * Description: The method will close any lingering connections.
          */
-        public void CloseDBConnection()
+        public void CloseDBConnectionLeft()
         {
             //Close the connections before the application closes
-            if (sourceConn != null &&
-                sourceConn.State == ConnectionState.Open)
+            if (sourceConnLeft != null &&
+                sourceConnLeft.State == ConnectionState.Open)
             {
-                sourceConn.Close();
+                sourceConnLeft.Close();
             }
 
-            _ConnectionOpen = false;
-        } 
+            _ConnectionOpenLeft = false;
+        }
 
-        
+        public void CloseDBConnectionRight()
+        {
+            //Close the connections before the application closes
+            if (sourceConnRight != null &&
+                sourceConnRight.State == ConnectionState.Open)
+            {
+                sourceConnRight.Close();
+            }
+
+            _ConnectionOpenRight = false;
+        }
+
+
         /*
          * Method Name: ExtractTables
          * Parameters: SqlConnection conn
@@ -363,7 +417,7 @@ namespace DbConnector
          * Return: DataTable missingContents -- contents to be synced over
          * Description: This will compare two tables in two databases and find any missing rows.
          */
-        public DataTable checkMissingRows(DbConnectorInfo destinationConnInfo, string leftT, string leftID, string rightT, string rightID)
+        public DataTable checkMissingRows(string leftT, string leftID, string rightT, string rightID)
         {
             DataTable leftContents = new DataTable();
             DataTable rightContents = new DataTable();
@@ -377,7 +431,7 @@ namespace DbConnector
                 /*
                  * Select statement for table 1
                  */
-                SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
+                SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConnLeft);
 
                 /*
                  * Run the command and get the results.
@@ -395,8 +449,7 @@ namespace DbConnector
                 /*
                  * Select statement for table 2
                  */
-                cmd = new SqlCommand("Select * from " + rightT, InitData(destinationConnInfo.server, 
-                    destinationConnInfo.userid,destinationConnInfo.password, destinationConnInfo.database));
+                cmd = new SqlCommand("Select * from " + rightT, sourceConnRight);
 
                 /*
                  * Run the command and get the results.
@@ -489,7 +542,7 @@ namespace DbConnector
             }
 
             //pull missing data
-            cmd = new SqlCommand(buildSelect(leftTable, null, rowsToFind), sourceConn);
+            cmd = new SqlCommand(buildSelect(leftTable, null, rowsToFind), sourceConnLeft);
 
             try
             {
