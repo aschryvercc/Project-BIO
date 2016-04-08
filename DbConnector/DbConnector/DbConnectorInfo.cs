@@ -10,7 +10,6 @@ namespace DbConnector
 {
     public class DbConnectorInfo
     {
-        private IPAddress _connectIP; //Don't know what to do with this...
 
         public DbConnectorInfo (string serv, string db, string uName, string pass)
         {

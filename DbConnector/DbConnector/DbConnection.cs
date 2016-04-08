@@ -3,6 +3,7 @@ using System.Net;
 using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 
 using System.Linq;
 using System.Web;
@@ -13,22 +14,54 @@ namespace DbConnector
     public class DbConnection
     {
         //tracks connection info
-        private DbConnectorInfo sourceDbConnectorInfo; //The source connection information
-        private SqlConnection sourceConn = null;  //The source database connection
+        private DbConnectorInfo SourceDbConnectorInfoLeft; //The source connection information
+        private DbConnectorInfo SourceDbConnectorInfoRight; //The source connection information
+        private DbConnectorInfo mgmtConnInfo;
+        private MySqlConnection MySourceConnLeft;
+        private MySqlConnection MySourceConnRight;
+        private SqlConnection MSSourceConnLeft = null;  //The source database connection
+        private SqlConnection MSSourceConnRight = null;  //The source database connection
+        private SqlConnection mgmtConn = null;
         private string connectionString = "";   //connection string to a database when connecting the source or destination
-        private bool _ConnectionOpen;
-        public bool ConnectionOpen
+        private bool _ConnectionOpenLeft;
+        private bool _ConnectionOpenRight;
+        private bool _mgmtOpen;
+        private string _leftSide;
+        private string _rightSide;
+        public bool ConnectionOpenLeft
         {
-            get { return _ConnectionOpen; }
+            get { return _ConnectionOpenLeft; }
+        }
+        public bool ConnectionOpenRight
+        {
+            get { return _ConnectionOpenRight; }
+        }
+        public bool mgmtOpen
+        {
+            get { return _mgmtOpen; }
+        }
+        public string leftSide
+        {
+            get { return _leftSide; }
+        }
+        public string rightSide
+        {
+            get { return _rightSide; }
         }
 
         /*
          * Constructor
          */
-        public DbConnection(DbConnectorInfo connectionInfo)
+        public DbConnection(DbConnectorInfo connectionInfo1, DbConnectorInfo connectionInfo2, DbConnectorInfo mgmtInfo,  string left, string right)
         {
-            sourceDbConnectorInfo = connectionInfo;
-            _ConnectionOpen = false;
+            SourceDbConnectorInfoLeft = connectionInfo1;
+            SourceDbConnectorInfoRight = connectionInfo2;
+            mgmtConnInfo = mgmtInfo;
+            _ConnectionOpenLeft = false;
+            _ConnectionOpenRight = false;
+            _mgmtOpen = false;
+            _leftSide = left;
+            _rightSide = right;
         }
 
         /*
@@ -41,10 +74,17 @@ namespace DbConnector
          * Return: DataTable PullData -- a datatable containing the pulled data
          * Description: The method executes a query to a database based off a dynamically created select statement from a group of joined tables.
          */
-        public DataTable PullData(Dictionary<string, string> tablePair, List<string> columns, List<string> conditions)
+        public DataTable MSPullData(Dictionary<string, string> tablePair, List<string> columns, List<string> conditions, char cond)
         {
             DataTable pulledContents = new DataTable();
-            SqlCommand cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), sourceConn);
+            SqlCommand cmd;
+
+            if (cond == 'L')
+                cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), MSSourceConnLeft);
+            else if (cond == 'R')
+                cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), MSSourceConnRight);
+            else
+                return null;
 
             try
             {
@@ -70,10 +110,17 @@ namespace DbConnector
          * Return: DataTable PullData -- a datatable containing the pulled data
          * Description: The method executes a query to a database based off a dynamically created select statement from a single table.
          */
-        public DataTable PullData(string table, List<string> columns, List<string> conditions)
+        public DataTable MSPullData(string table, List<string> columns, List<string> conditions, char cond)
         {
             DataTable pulledContents = new DataTable();
-            SqlCommand cmd = new SqlCommand(buildSelect(table, columns, conditions), sourceConn);
+            SqlCommand cmd;
+
+            if (cond == 'L')
+                cmd = new SqlCommand(buildSelect(table, columns, conditions), MSSourceConnLeft);
+            else if (cond == 'R')
+                cmd = new SqlCommand(buildSelect(table, columns, conditions), MSSourceConnRight);
+            else
+                return null;
 
             try
             {
@@ -90,7 +137,7 @@ namespace DbConnector
         }
 
         /*
-         * Method Name: insertUpdate
+         * Method Name: MsInsert
          * Parameters: 
          string table -- table to be inserted into
          DataTable data -- a datatable containing the data to be inserted.
@@ -98,9 +145,17 @@ namespace DbConnector
          * Return: void
          * Description: This method executes either an insert or update statement to a database.
          */
-        public void insertUpdate(string table, DataTable data, char useMode)
+        public void Msinsert(string table, DataTable data, char cond)
         {
-            SqlCommand cmd = new SqlCommand(buildInsertUpdate(table, data, useMode), sourceConn);
+            SqlCommand cmd;
+
+
+            if (cond == 'l')
+                cmd = new SqlCommand(buildInsert(table, data), MSSourceConnLeft);
+            else if (cond == 'r')
+                cmd = new SqlCommand(buildInsert(table, data), MSSourceConnRight);
+            else
+                cmd = null;
 
             try
             {
@@ -109,6 +164,37 @@ namespace DbConnector
             catch(Exception ex)
             {
                 throw (ex);
+            }
+        }
+
+
+        public void MsUpdate(string table, string idRow, DataTable data, char cond)
+        {
+            SqlCommand cmd;
+            List<string> cols = new List<string>();
+
+            foreach (DataColumn col in data.Columns)
+            {
+                cols.Add(col.ColumnName);
+            }
+
+            foreach (DataRow row in data.Rows)
+            {
+                if (cond == 'l')
+                    cmd = new SqlCommand(buildUpdate(table, row.Field<string>(idRow), idRow, cols, row), MSSourceConnLeft);
+                else if (cond == 'r')
+                    cmd = new SqlCommand(buildUpdate(table, row.Field<string>(idRow), idRow, cols, row), MSSourceConnRight);
+                else
+                    cmd = null;
+
+                try
+                {
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    throw (ex);
+                }
             }
         }
 
@@ -205,7 +291,7 @@ namespace DbConnector
                 query += " where ";
                 for (int i = 0; i <= conditions.Count; i++)
                 {
-                    query += conditions[i] + ", ";
+                    query += conditions[i] + " ";
                 }
                 query = query.Remove(query.Length - 3);
             }
@@ -216,25 +302,17 @@ namespace DbConnector
         }
 
         /*
-         * Method Name: buildInsertUpdate
+         * Method Name: buildInsert
          * Parameters: 
          string table -- table to be inserted into
          DataTable data -- a datatable containing the data to be inserted.
          char useMode -- sets the buildInsertUpdate function to either create an insert or update statement.
          * Return: void
-         * Description: This method builds an insert or update statement based off a Datatable.
+         * Description: This method builds an insert statement based off a Datatable.
          */
-        private string buildInsertUpdate(string table, DataTable data, char useMode)
+        private string buildInsert(string table, DataTable data)
         {
-            string query = "";
-            if (useMode == 'i')
-            {
-                query = "insert into " + table + " (";
-            }
-            else if (useMode == 'u')
-            {
-                query = "update " + table + " (";
-            }
+            string query = "insert into " + table + " (";
 
             //insert columns to be inserted into
             foreach (DataColumn column in data.Columns)
@@ -262,12 +340,39 @@ namespace DbConnector
         }
 
         /*
-         * Method Name: InitData
+         * Method Name: buildUpdate
+         * Parameters: 
+         string table -- table to be inserted into
+         DataTable data -- a datatable containing the data to be inserted.
+         char useMode -- sets the buildInsertUpdate function to either create an insert or update statement.
+         * Return: void
+         * Description: This method builds an update statement based off a Datatable.
+         */
+        private string buildUpdate(string table, string rowKey, string idRow, List<string> columnNames, DataRow data)
+        {
+            string query = "update " + table + " set ";
+
+            foreach (string s in columnNames)
+            {
+                if (s != idRow)
+                {
+                    query += s + " = '" + data.Field<string>(s) + "', ";
+                }
+            }
+            query = query.Remove(query.Length - 3);
+
+            query += " where " + rowKey + " = " + idRow + ";";
+
+            return query;
+        }
+
+        /*
+         * Method Name: MsInitData/MyInitData
          * Parameters: string server, string userid, string password, string database
          * Return: SqlConnection
          * Description: The method will create a SQL Server connection that it will return based on the passed parameters.
          */
-        private SqlConnection InitData(string server, string userid, string password, string database)
+        private SqlConnection MsInitData(string server, string userid, string password, string database)
         {
             //Setup the connection string
             SqlConnection conn = null;
@@ -281,52 +386,135 @@ namespace DbConnector
                 conn = new SqlConnection(connectionString);
                 conn.Open();
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
                 throw (ex);
             }
-
             //Return the new MySql Connection
             return conn;
         }
 
+        private MySqlConnection MyInitData(string server, string userid, string password, string database)
+        {
+            //Setup the connection string
+            MySqlConnection conn = null;
+            connectionString = @"server=" + server + ";user id=" + userid + ";password=" + password + ";database=" + database;
+
+            //Try to connect to the database based on the connection string
+            //Also fill the table list immediately since the database is currently selected
+            try
+            {
+                //Open connection to database
+                conn = new MySqlConnection(connectionString);
+                conn.Open();
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+            //Return the new MySql Connection
+            return conn;
+        }
+
+
         /*
-         * Method Name: OpenDBConnection
-         * Parameters: void
-         * Return: void
-         * Description: The method will open a connection to a database and get the 
-         * database information used to create the connection.
-         */
-        public void OpenDBConnection()
+            * Method Name: OpenDBConnectionLeft/OpenDbConnectionRight
+            * Parameters: void
+            * Return: void
+            * Description: The method will open a connection to a database.
+            */
+        public void OpenDBConnectionLeft()
         {
             //If logging into the source database connect to it
-            sourceConn = InitData(sourceDbConnectorInfo.server, sourceDbConnectorInfo.userid, 
-                                  sourceDbConnectorInfo.password, sourceDbConnectorInfo.database);
+            if (leftSide == "MS")
+            MSSourceConnLeft = MsInitData(SourceDbConnectorInfoLeft.server, SourceDbConnectorInfoLeft.userid, 
+                                  SourceDbConnectorInfoLeft.password, SourceDbConnectorInfoLeft.database);
+            else  if (leftSide == "MY")
+            MySourceConnLeft = MyInitData(SourceDbConnectorInfoLeft.server, SourceDbConnectorInfoLeft.userid,
+                                  SourceDbConnectorInfoLeft.password, SourceDbConnectorInfoLeft.database);
 
-            _ConnectionOpen = true;
+            _ConnectionOpenLeft = true;
+            //sourceTables = ExtractTables(sourceConn);
+            //sourceDBName = sourceDbConnectorInfo.database;
+        }
+
+        public void OpenDBConnectionRight()
+        {
+            //If logging into the source database connect to it
+            if (leftSide == "MS")
+                MSSourceConnRight = MsInitData(SourceDbConnectorInfoRight.server, SourceDbConnectorInfoRight.userid,
+                                      SourceDbConnectorInfoRight.password, SourceDbConnectorInfoRight.database);
+            else if (leftSide == "MY")
+                MySourceConnRight = MyInitData(SourceDbConnectorInfoRight.server, SourceDbConnectorInfoRight.userid,
+                                      SourceDbConnectorInfoRight.password, SourceDbConnectorInfoRight.database);
+
+            _ConnectionOpenRight = true;
+            //sourceTables = ExtractTables(sourceConn);
+            //sourceDBName = sourceDbConnectorInfo.database;
+        }
+
+        public void OpenMGMTConnection()
+        {
+            mgmtConn = MsInitData(mgmtConnInfo.server, mgmtConnInfo.userid,
+                                      mgmtConnInfo.password, mgmtConnInfo.database);
+
+            _mgmtOpen = true;
             //sourceTables = ExtractTables(sourceConn);
             //sourceDBName = sourceDbConnectorInfo.database;
         }
 
         /*
-         * Method Name: CloseDBConnection
+         * Method Name: CloseDBConnectionLeft/CloseDBConnectionRight
          * Parameters: void
          * Return: void
          * Description: The method will close any lingering connections.
          */
-        public void CloseDBConnection()
+        public void CloseDBConnectionLeft()
         {
             //Close the connections before the application closes
-            if (sourceConn != null &&
-                sourceConn.State == ConnectionState.Open)
+            if (MSSourceConnLeft != null &&
+                MSSourceConnLeft.State == ConnectionState.Open && leftSide == "MS")
             {
-                sourceConn.Close();
+                MSSourceConnLeft.Close();
+            }
+            else if (MySourceConnLeft != null &&
+                MySourceConnLeft.State == ConnectionState.Open && leftSide == "MY")
+            {
+                MySourceConnLeft.Close();
             }
 
-            _ConnectionOpen = false;
-        } 
+            _ConnectionOpenLeft = false;
+        }
 
-        
+        public void CloseDBConnectionRight()
+        {
+            //Close the connections before the application closes
+            if (MSSourceConnRight != null &&
+                MSSourceConnRight.State == ConnectionState.Open && rightSide == "MS")
+            {
+                MSSourceConnRight.Close();
+            }
+            else if (MySourceConnRight != null &&
+                MySourceConnRight.State == ConnectionState.Open && rightSide == "MY")
+            {
+                MySourceConnRight.Close();
+            }
+
+            _ConnectionOpenRight = false;
+        }
+
+        public void CloseMGMTConnection()
+        {
+            //Close the connections before the application closes
+            if (mgmtConn != null &&
+                mgmtConn.State == ConnectionState.Open)
+            {
+                MSSourceConnRight.Close();
+            }
+
+            _mgmtOpen = false;
+        }
+
         /*
          * Method Name: ExtractTables
          * Parameters: SqlConnection conn
@@ -356,189 +544,146 @@ namespace DbConnector
          * Method Name: checkMissingRows
          * Parameters: 
          *  DbConnectorInfo compareDB -- Connection info for second database
-         *  string leftT -- Left table to be compared against
-         *  string leftID -- right table to be compared against
-         *  string rightT -- table ID
-         *  string rightID -- table ID
-         * Return: DataTable missingContents -- contents to be synced over
+         *  string table - 
+         * Return: unsynccedRows a list of strings containing the rows to be sent over.
          * Description: This will compare two tables in two databases and find any missing rows.
          */
-        private DataTable checkMissingRows(SqlConnection destinationConn, string leftT, string leftID, string rightT, string rightID)
+        public List<string> findMissingRows(string[] conditions)
         {
-            DataTable leftContents = new DataTable();
-            DataTable rightContents = new DataTable();
-            DataTable missingContents = new DataTable();
-            bool rowPresent = false;
+            DataTable pulledContents = new DataTable();
+            List<string> unsyncedRows = new List<string>();
+            List<string> conditionsToAdd = new List<string>();
+            conditionsToAdd.Add("tableName = " + conditions[0]);
+            conditionsToAdd.Add("&&");
+            conditionsToAdd.Add("dbInstance = " + conditions[1]);
+            conditionsToAdd.Add("&&");
+            conditionsToAdd.Add("new = " + conditions[2]);
+            conditionsToAdd.Add("&&");
+            conditionsToAdd.Add("synced = 0");
+
+
+            SqlCommand cmd = new SqlCommand(buildSelect("updateLog", null, conditionsToAdd), mgmtConn);
 
             try
             {
-
-                #region select statement for table 1
-                /*
-                 * Select statement for table 1
-                 */
-                SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
-
-                /*
-                 * Run the command and get the results.
-                 */
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(leftContents);
-
-                /*
-                 * Dispose the sql adapter.
-                 */
+                da.Fill(pulledContents);
                 da.Dispose();
-                #endregion
-
-                #region select statement for table 2
-                /*
-                 * Select statement for table 2
-                 */
-                cmd = new SqlCommand("Select * from " + rightT, destinationConn);
-
-                /*
-                 * Run the command and get the results.
-                 */
-                da = new SqlDataAdapter(cmd);
-                da.Fill(rightContents);
-
-                /*
-                 * Dispose the sql adapter.
-                 */
-                da.Dispose();
-                #endregion
-
-                /*
-                 * Close the database connection.
-                 */
             }
             catch (Exception ex)
             {
-                throw (ex);
+                throw ex;
             }
 
-            //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
-
-            //iterate left side.
-            foreach (DataRow leftRow in leftContents.Rows)
+            foreach (DataRow i in pulledContents.Rows)
             {
-                //iterate right side.
-                foreach (DataRow rightRow in rightContents.Rows)
-                {
-                    //if row is found, mark so, break and continue.
-                    if (leftRow.Field<Type>(leftID) == rightRow.Field<Type>(rightID))
-                    {
-                        rowPresent = true;
-                        break;
-                    }
-                }
-                //if row is not found, add to list to be synced.
-                if (rowPresent != true)
-                {
-                    missingContents.Rows.Add(leftRow);
-                }
-                rowPresent = false;
+                unsyncedRows.Add(i.Field<string>("rowName") + " = " + i.Field<string>("rowKey") + " ||");
             }
 
-            return missingContents;
+            return unsyncedRows;
         }
 
-        /*
-         * Method Name: checkUpdateRows
-         * Parameters: 
-         *  DbConnectorInfo compareDB -- Connection info for second database
-         *  string leftT -- Left table to be compared against
-         *  string leftID -- right table to be compared against
-         *  string rightT -- table ID
-         *  string rightID -- table ID
-         * Return: DataTable missingContents -- contents to be synced over
-         * Description: This will compare two tables in two databases and find asyncronus data between to two, passing back to rows to be updated.
-         */
-        private DataTable checkUpdateRows(SqlConnection destinationConn, string leftT, string leftID, string rightT, string rightID)
+        public void syncNewLeft(string leftTable, string rightTable)
         {
-            DataTable leftContents = new DataTable();
-            DataTable rightContents = new DataTable();
-            DataTable missingContents = new DataTable();
-            bool rowPresent = false;
+            List<string> unsyncedRows = new List<string>();
+            DataTable contentsToAdd = new DataTable();
+            string[] cond = { leftTable, SourceDbConnectorInfoLeft.database, "1" };
 
-            try
-            {
+            OpenMGMTConnection();
+            unsyncedRows = findMissingRows(cond);
+            CloseMGMTConnection();
 
-                #region select statement for table 1
-                /*
-                 * Select statement for table 1
-                 */
-                SqlCommand cmd = new SqlCommand("Select * from " + leftT, sourceConn);
+            OpenDBConnectionLeft();
+            if (leftSide == "MS")
+                contentsToAdd = MSPullData(leftTable, null, unsyncedRows, 'l');
+            else if (leftSide == "MY")
+                contentsToAdd = MSPullData(leftTable, null, unsyncedRows, 'l');
+            CloseDBConnectionLeft();
 
-                /*
-                 * Run the command and get the results.
-                 */
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                da.Fill(leftContents);
+            OpenDBConnectionRight();
+            if (rightSide == "MS")
+                Msinsert(rightTable, contentsToAdd, 'r');
+            else if (leftSide == "MY")
+                Msinsert(rightTable, contentsToAdd, 'r');
+            CloseDBConnectionLeft();
 
-                /*
-                 * Dispose the sql adapter.
-                 */
-                da.Dispose();
-                #endregion
-
-                #region select statement for table 2
-                /*
-                 * Select statement for table 2
-                 */
-                cmd = new SqlCommand("Select * from " + rightT, destinationConn);
-
-                /*
-                 * Run the command and get the results.
-                 */
-                da = new SqlDataAdapter(cmd);
-                da.Fill(leftContents);
-
-                /*
-                 * Dispose the sql adapter.
-                 */
-                da.Dispose();
-                #endregion
-            }
-            catch (Exception ex)
-            {
-                throw (ex);
-            }
-
-            //iterate through each row and check if every instance of the left side exists in the right. If not, add to the missing contents.
-
-            //iterate left side.
-            foreach (DataRow leftRow in leftContents.Rows)
-            {
-                //iterate right side.
-                foreach (DataRow rightRow in rightContents.Rows)
-                {
-                    //iterate through fields
-                    List<string> leftVals = new List<string>();
-                    List<string> rightVals = new List<string>();
-
-                    //add all fields to seperate lists for comparison.
-                    foreach (string value in leftRow.ItemArray)
-                    {
-                        leftVals.Add(value);
-                    }
-                    foreach (string value in rightRow.ItemArray)
-                    {
-                        rightVals.Add(value);
-                    }
-                    //iterate through list, if they do not match, an update is required and the data should be added to be carried over.
-                    for (int i = 0; i <= leftVals.Count; i++)
-                    {
-                        if (leftVals[i] != rightVals[i])
-                        {
-                            missingContents.Rows.Add(leftRow);
-                        }
-                    }
-                }
-            }
-            return missingContents;
         }
 
+        public void syncNewRight(string leftTable, string rightTable)
+        {
+            List<string> unsyncedRows = new List<string>();
+            DataTable contentsToAdd = new DataTable();
+            string[] cond = { leftTable, SourceDbConnectorInfoLeft.database, "1" };
+
+            OpenMGMTConnection();
+            unsyncedRows = findMissingRows(cond);
+            CloseMGMTConnection();
+
+            OpenDBConnectionRight();
+            if (leftSide == "MS")
+                contentsToAdd = MSPullData(rightTable, null, unsyncedRows, 'r');
+            else if (leftSide == "MY")
+                contentsToAdd = MSPullData(rightTable, null, unsyncedRows, 'r');
+            CloseDBConnectionRight();
+
+            OpenDBConnectionLeft();
+            if (rightSide == "MS")
+                Msinsert(leftTable, contentsToAdd, 'l');
+            else if (leftSide == "MY")
+                Msinsert(leftTable, contentsToAdd, 'l');
+            CloseDBConnectionRight();
+
+        }
+
+        public void syncUpdateLeft(string leftTable, string rightTable, string idRow)
+        {
+            List<string> unsyncedRows = new List<string>();
+            DataTable contentsToAdd = new DataTable();
+            string[] cond = { leftTable, SourceDbConnectorInfoLeft.database, "0" };
+
+            OpenMGMTConnection();
+            unsyncedRows = findMissingRows(cond);
+            CloseMGMTConnection();
+
+            OpenDBConnectionLeft();
+            if (leftSide == "MS")
+                contentsToAdd = MSPullData(leftTable, null, unsyncedRows, 'l');
+            else if (leftSide == "MY")
+                contentsToAdd = MSPullData(leftTable, null, unsyncedRows, 'l');
+            CloseDBConnectionLeft();
+
+            OpenDBConnectionRight();
+            if (rightSide == "MS")
+                MsUpdate(rightTable, idRow, contentsToAdd, 'r');
+            else if (leftSide == "MY")
+                MsUpdate(rightTable, idRow, contentsToAdd, 'r');
+            CloseDBConnectionLeft();
+        }
+
+
+        public void syncUpdateRight(string leftTable, string rightTable, string idRow)
+        {
+            List<string> unsyncedRows = new List<string>();
+            DataTable contentsToAdd = new DataTable();
+            string[] cond = { leftTable, SourceDbConnectorInfoLeft.database, "0" };
+
+            OpenMGMTConnection();
+            unsyncedRows = findMissingRows(cond);
+            CloseMGMTConnection();
+
+            OpenDBConnectionLeft();
+            if (leftSide == "MS")
+                contentsToAdd = MSPullData(rightTable, null, unsyncedRows, 'r');
+            else if (leftSide == "MY")
+                contentsToAdd = MSPullData(rightTable, null, unsyncedRows, 'r');
+            CloseDBConnectionLeft();
+
+            OpenDBConnectionRight();
+            if (rightSide == "MS")
+                MsUpdate(rightTable, idRow, contentsToAdd, 'l');
+            else if (leftSide == "MY")
+                MsUpdate(rightTable, idRow, contentsToAdd, 'l');
+            CloseDBConnectionLeft();
+        }
     }
 }
