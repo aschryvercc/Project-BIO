@@ -63,6 +63,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Context.cs" />
     <Compile Include="IqbExportService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="qbExportService.svc.cs">

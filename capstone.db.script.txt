@@ -1,0 +1,373 @@
+
+use cows;
+
+create table company
+(
+company_id INT primary key,
+name VARCHAR(45),
+address TEXT,
+email VARCHAR(45),
+url VARCHAR(45),
+store_sub_domain VARCHAR(45),
+info_lookup_url VARCHAR(200),
+info_feedback_url VARCHAR(200),
+quick_sale_customer_id INT,
+tax_rate_name VARCHAR(45),
+tax_rate_perc DECIMAL(12,2),
+auto_sale_id_prefix VARCHAR(45),
+auto_sale_id_suffix VARCHAR(45),
+auto_sale_id_inc INT,
+auto_sale_id_num_digits INT,
+store_guest_price_list_id INT,
+store_css TEXT,
+show_production TINYINT,
+show_inventory TINYINT,
+show_shipping TINYINT,
+allow_customer_registration bit,
+carcass_barcode_config_id INT,
+email_delivery_on bit,
+email_num_recip_per_email INT,
+email_smtp_server_name VARCHAR(80),
+email_smtp_server_port INT,
+email_smtp_server_use_tls bit,
+email_smtp_user VARCHAR(80),
+email_smtp_password VARCHAR(80),
+max_active_devices INT,
+payfirma_merchant_id VARCHAR(15),
+payfirma_api_key VARCHAR(45),
+email_template_invoice_subject TEXT,
+email_template_invoice_message TEXT,
+email_template_place_order_subject TEXT,
+email_template_place_order_message TEXT,
+email_template_request_payment_subject TEXT,
+email_template_request_payment_message TEXT,
+email_template_payment_received_subject TEXT,
+email_template_payment_received_message TEXT,
+store_header_html TEXT,
+store_home_html TEXT,
+store_footer_html TEXT
+);
+
+create table barcode_config
+(
+barcode_config_id INT primary key,
+name VARCHAR(45),
+prod_code_scan_idx TINYINT,
+prod_code_scan_len TINYINT,
+extra_code_scan_enabled bit,
+extra_identifier_enabled bit,
+extra_code_name VARCHAR(45),
+extra_code_scan_idx TINYINT,
+extra_code_scan_len TINYINT,
+extra_code_scan_enabled2 bit,
+extra_identifier_enabled2 bit,
+extra_code_name2 VARCHAR(45),
+extra_code_scan_idx2 TINYINT,
+extra_code_scan_len2 TINYINT,
+prod_weight_scan_enabled bit,
+prod_weight_scan_idx TINYINT,
+prod_weight_scan_len TINYINT,
+prod_weight_decimal_places TINYINT,
+unique_id_scan_enabled bit,
+unique_id_scan_idx TINYINT,
+unique_id_scan_len TINYINT,
+sample_scan_code VARCHAR(200),
+company_id INT,
+scan_id2_enabled bit,
+scan_id2 VARCHAR(45),
+prod_code_scan_idx2 TINYINT,
+prod_code_scan_len2 TINYINT,
+barcode_scan_len TINYINT,
+FOREIGN KEY (company_ID) REFERENCES company(company_id)
+);
+
+create table "user"
+(
+user_id INT primary key,
+full_name VARCHAR(30),
+email VARCHAR(40),
+password VARCHAR(12),
+active TINYINT,
+company_id INT,
+signon_token VARCHAR(45),
+signon_expiry DATETIME,
+FOREIGN KEY (company_ID) REFERENCES company(company_id)
+);
+
+create table device 
+(
+device_id INT primary key,
+udid VARCHAR(45),
+name VARCHAR(45),
+device_description VARCHAR(45),
+active bit,
+authorization_token VARCHAR(45),
+last_sync TIMESTAMP,
+application_version VARCHAR(20),
+activation_user_id INT,
+company_id INT,
+FOREIGN KEY (company_ID) REFERENCES company(company_id),
+FOREIGN KEY (activation_user_id) REFERENCES "user"(user_id)
+);
+
+create table security_right
+(
+security_right_id INT primary key,
+right_name VARCHAR(45)
+);
+
+create table usersecurity_right
+(
+user_id INT primary key,
+security_right_id INT,
+FOREIGN KEY (user_id) REFERENCES "user"(user_id),
+FOREIGN KEY (security_right_id) REFERENCES security_right(security_right_id)
+);
+
+create table audit
+(
+audit_id INT primary key,
+type VARCHAR(80),
+message VARCHAR(200),
+timestamp TIMESTAMP,
+user_id INT,
+FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+)
+
+-----------------------------------------------
+
+create table source
+(
+source_id INT primary key,
+name VARCHAR(45),
+premise_id VARCHAR(45),
+bio_id VARCHAR(45),
+producer_name VARCHAR(200),
+region VARCHAR(200),
+ration VARCHAR(200),
+company_id INT,
+FOREIGN KEY (company_ID) REFERENCES company(company_id)
+);
+
+create table rfid
+(
+rfid_id INT primary key,
+scan_code VARCHAr(15),
+date DATETIME,
+sequence_number INT,
+eid VARCHAR(15),
+notes TEXT,
+source_id INT,
+company_id INT,
+FOREIGN KEY (source_id) REFERENCES source(source_id),
+FOREIGN KEY (company_ID) REFERENCES company(company_id)
+);
+
+create table batch
+(
+batch_id INT primary key,
+date DATE,
+number INT,
+notes VARCHAR(45),
+company_id INT,
+FOREIGN KEY (company_ID) REFERENCES company(company_id)
+);
+
+create table production
+(
+production_id INT primary key,
+creation_batch_id INT,
+depletion_batch_id INT,
+scan_id VARCHAR(45),
+unique_id VARCHAR(45),
+size DECIMAL(12,3),
+scan_code VARCHAR(50),
+item_exported INT,
+item_transferred INT,
+item_error VARCHAR(100),
+customer_rating INT,
+customer_note TEXT,
+customer_ip VARCHAR(45),
+company_id INT,
+FOREIGN KEY (company_ID) REFERENCES company(company_id),
+FOREIGN KEY (creation_batch_id) REFERENCES batch(batch_id)
+);
+
+create table carcass
+(
+carcass_id INT primary key,
+scan_code VARCHAR(50),
+unique_id VARCHAR(20),
+eid VARCHAR(50),
+hot_weight DECIMAL(12,3),
+modified_date DATETIME,
+grade VARCHAR(15),
+sex VARCHAR(15),
+birth_date DATE,
+hormone_implant bit,
+tag_score INT,
+suspension_method VARCHAR(15),
+notes TEXT,
+ribeye_photo_ref VARCHAR(40),
+loin_photo_ref VARCHAR(40),
+fat_measurement1 DECIMAL(8,1),
+fat_measurement2 DECIMAL(8,1),
+fat_measurement3 DECIMAL(8,1),
+fat_measurement_unit VARCHAR(15),
+marbling VARCHAR(15),
+lean_colour INT,
+fat_colour INT,
+cold_weight DECIMAL(12,3),
+tenderness1 DECIMAL(8,1),
+tenderness2 DECIMAL(8,1),
+tenderness3 DECIMAL(8,1),
+tenderness4 DECIMAL(8,1),
+tenderness5 DECIMAL(8,1),
+tenderness6 DECIMAL(8,1),
+tenderness7 DECIMAL(8,1),
+tenderness8 DECIMAL(8,1),
+tenderness_unit VARCHAR(15),
+tenderness_olympic_average DECIMAL(12,1),
+tenderness_std_deviation DECIMAL(12,2),
+tenderness_report DECIMAL(8,1),
+ph_value1 DECIMAL(4,2),
+ph_value2 DECIMAL(4,2),
+ph_value3 DECIMAL(4,2),
+ph_timestamp1 DATETIME,
+ph_timestamp2 DATETIME,
+ph_timestamp3 DATETIME,
+ribeye_width DECIMAL(8,1),
+ribeye_length DECIMAL(8,1),
+ribeye_area DECIMAL(12,2),
+ribeye_result_photo_ref VARCHAR(40),
+loin_result_photo_ref VARCHAR(40),
+grading_result_file_ref VARCHAR(50),
+date DATETIME,
+sequence_number INT,
+source_id INT,
+company_id INT,
+FOREIGN KEY (company_id) REFERENCES company(company_id),
+FOREIGN KEY (source_id) REFERENCES source(source_id)
+);
+
+create table production_carcass
+(
+carcass_id INT primary key,
+production_id INT,
+FOREIGN KEY (carcass_id) REFERENCES carcass(carcass_id),
+FOREIGN KEY (production_id ) REFERENCES production(production_id )
+);
+
+create table production_error
+(
+production_error_id INT primary key,
+date TIMESTAMP,
+carcass_unique_id VARCHAR(45),
+production_unique_id VARCHAR(45),
+scan_code VARCHAR(50),
+message TEXT,
+batch_id INT,
+company_id INT,
+FOREIGN KEY (company_ID) REFERENCES company(company_id),
+FOREIGN KEY (batch_id) REFERENCES batch(batch_id)
+);
+
+create table ingredient
+(
+ingredient_id INT primary key,
+product_code VARCHAR(45),
+name VARCHAR(45),
+short_description TEXT,
+barcode_config_id INT,
+company_id INT,
+archive bit,
+FOREIGN KEY (company_ID) REFERENCES company(company_id)
+);
+
+create table batch_ingredient
+(
+batch_ingredient_id INT primary key,
+unique_id VARCHAR(45),
+size DECIMAL(12,3),
+date DATE,
+scan_code VARCHAR(200),
+extra_code_1 VARCHAR(45),
+extra_code_2 VARCHAR(45),
+batch_id INT,
+ingredient_id INT,
+company_id INT,
+FOREIGN KEY (company_ID) REFERENCES company(company_id),
+FOREIGN KEY (ingredient_id) REFERENCES ingredient(ingredient_id) 
+);
+
+create table carcass_depletion_batch
+(
+carcass_id INT primary key,
+batch_id INT,
+FOREIGN KEY (carcass_id) REFERENCES carcass(carcass_id ),
+FOREIGN KEY (batch_id) REFERENCES batch(batch_id)
+);
+
+---------------------------------
+
+create table customer
+(
+customer_id INT primary key,
+price_list_id INT,
+company_id INT,
+name VARCHAR(200),
+phone VARCHAR(20),
+address TEXT,
+email VARCHAR(45),
+password VARCHAR(200),
+delivery_emails VARCHAr(15),
+payment_terms_days INT,
+reset_password_hash VARCHAR(15),
+reset_password_timestamp dateTime,
+discount DECIMAL(4,1),
+FOREIGN KEY (company_ID) REFERENCES company(company_id)
+);
+
+create table shipping_option
+(
+shipping_option_id INT primary key,
+name VARCHAR(45),
+active bit,
+company_id INT,
+information TEXT,
+monday bit,
+tuesday bit,
+wednesday bit,
+thursday bit,
+friday bit,
+saturday bit,
+sunday bit,
+FOREIGN KEY (company_id) REFERENCES company(company_id)
+);
+
+create table sale
+(
+sale_id INT,
+customer_id INT,
+company_id INT,
+shipping_option_id INT,
+sale_number VARCHAR(20),
+po_number VARCHAR(20),
+order_date DATETIME,
+invoice_date DATE,
+due_date DATE,
+ship_date DATE,
+approved bit,
+payment_requested DECIMAL,
+payment_requested_hash VARCHAR(15),
+closed bit,
+payment_terms VARCHAR(100),
+notes TEXT,
+sale_uuid VARCHAR(33),
+created_by VARCHAR(50),
+discount DECIMAL(4,1),
+invoice_amount DECIMAL(12,2),
+FOREIGN KEY (company_id) REFERENCES company(company_id),
+FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+FOREIGN KEY (shipping_option_id) REFERENCES shipping_option(shipping_option_id)
+)
