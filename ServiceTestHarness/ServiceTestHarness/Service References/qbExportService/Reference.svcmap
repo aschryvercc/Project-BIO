@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="ad8b5d21-39e9-4b09-a881-47d020b8d607" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost/qbExportService/qbExportService.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="qbExportService.xsd" MetadataType="Schema" ID="4b0db697-bc64-4a02-981b-87f7263e9d80" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd2" />
+    <MetadataFile FileName="qbExportService1.xsd" MetadataType="Schema" ID="376f9e3a-5a94-4ce4-a9cb-0f4139cca18c" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd1" />
+    <MetadataFile FileName="qbExportService2.xsd" MetadataType="Schema" ID="acfbc6ab-01c7-4d48-bcf9-9f2f18f46ef9" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd0" />
+    <MetadataFile FileName="qbExportService.disco" MetadataType="Disco" ID="d99722cf-55b8-4d1a-aa3b-207e4a358d5a" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?disco" />
+    <MetadataFile FileName="qbExportService.wsdl" MetadataType="Wsdl" ID="cdfc5168-792f-4f21-9595-e61b8dce44f8" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?wsdl" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using DbConnector;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -128,8 +130,36 @@ namespace CSVExportService
         public string CSVExport(string token)
         {
             string returnValue = "";
+            List<DataRow> ls = new List<DataRow>();
+
             //Extract table invoice data here
-            CsvExport<string> csve= new CsvExport<string>();
+
+            //DbConnectorInfo sourceInfo = new DbConnectorInfo();
+            //DbConnection sourceConnection = new DbConnection(sourceInfo);
+
+            //Dictionary<string, string> leftPair = new Dictionary<string, string>();
+            //Dictionary<string, string> rightPair = new Dictionary<string, string>();
+            //List<string> columns = new List<string>();
+            //List<string> conditions = new List<string>();
+
+            DataTable sourceData = new DataTable();//sourceConnection.PullData(true, leftPair, rightPair, columns, conditions);
+            sourceData.Columns.AddRange(new DataColumn[] {
+                new DataColumn("ID", typeof(Guid)),
+                new DataColumn("Date", typeof(DateTime)),
+                new DataColumn("StringValue", typeof(string)),
+                new DataColumn("NumberValue", typeof(int)),
+                new DataColumn("BooleanValue", typeof(bool))
+            });
+            sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String1", 100, true);
+            sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String2", 200, false);
+            sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String3", 300, true);
+
+            foreach (DataRow row in sourceData.Rows)
+            {
+                ls.Add(row);
+            }
+
+            CsvExport<DataRow> csve= new CsvExport<DataRow>(ls);
             string eventText = "";
 
             /*
@@ -146,7 +176,7 @@ namespace CSVExportService
             }
             catch(Exception ex)
             {
-
+                logEvent(ex.ToString());
             }
 
             eventText += "Return Value       :\r\n";
@@ -160,6 +190,6 @@ namespace CSVExportService
 
             return returnValue;
         }
-        #region
+        #endregion
     }
 }

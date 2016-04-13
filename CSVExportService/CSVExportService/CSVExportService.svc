@@ -1,1 +1,1 @@
-﻿<%@ ServiceHost Language="C#" Debug="true" Service="CSVExportService.Service1" CodeBehind="CSVExportService.svc.cs" %>
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="CSVExportService.CSVExportService" CodeBehind="CSVExportService.svc.cs" %>

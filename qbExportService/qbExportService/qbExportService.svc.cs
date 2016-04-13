@@ -704,10 +704,10 @@ namespace qbExportService
             ArrayList request = buildRequest();
             int totalRequests = request.Count;
 
-            if (Context.Current.Counter == null)
-            {
-                Context.Current.Counter = 0;
-            }
+            //if (Context.Current.Counter == null)
+            //{
+            //    Context.Current.Counter = 0;
+            //}
 
             int requestCount = Context.Current.Counter;
 

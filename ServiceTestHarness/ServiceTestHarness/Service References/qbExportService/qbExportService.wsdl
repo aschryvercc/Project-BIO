@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="qbExportService" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://localhost/qbExportService/qbExportService.svc?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://localhost/qbExportService/qbExportService.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost/qbExportService/qbExportService.svc?xsd=xsd2" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IqbExportService_authenticate_InputMessage">
+    <wsdl:part name="parameters" element="tns:authenticate" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_authenticate_OutputMessage">
+    <wsdl:part name="parameters" element="tns:authenticateResponse" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_clientVersion_InputMessage">
+    <wsdl:part name="parameters" element="tns:clientVersion" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_clientVersion_OutputMessage">
+    <wsdl:part name="parameters" element="tns:clientVersionResponse" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_closeConnection_InputMessage">
+    <wsdl:part name="parameters" element="tns:closeConnection" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_closeConnection_OutputMessage">
+    <wsdl:part name="parameters" element="tns:closeConnectionResponse" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_connectionError_InputMessage">
+    <wsdl:part name="parameters" element="tns:connectionError" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_connectionError_OutputMessage">
+    <wsdl:part name="parameters" element="tns:connectionErrorResponse" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_getLastError_InputMessage">
+    <wsdl:part name="parameters" element="tns:getLastError" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_getLastError_OutputMessage">
+    <wsdl:part name="parameters" element="tns:getLastErrorResponse" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_receiveResponseXML_InputMessage">
+    <wsdl:part name="parameters" element="tns:receiveResponseXML" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_receiveResponseXML_OutputMessage">
+    <wsdl:part name="parameters" element="tns:receiveResponseXMLResponse" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_sendRequestXML_InputMessage">
+    <wsdl:part name="parameters" element="tns:sendRequestXML" />
+  </wsdl:message>
+  <wsdl:message name="IqbExportService_sendRequestXML_OutputMessage">
+    <wsdl:part name="parameters" element="tns:sendRequestXMLResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IqbExportService">
+    <wsdl:operation name="authenticate">
+      <wsdl:input wsaw:Action="http://tempuri.org/IqbExportService/authenticate" message="tns:IqbExportService_authenticate_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IqbExportService/authenticateResponse" message="tns:IqbExportService_authenticate_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="clientVersion">
+      <wsdl:input wsaw:Action="http://tempuri.org/IqbExportService/clientVersion" message="tns:IqbExportService_clientVersion_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IqbExportService/clientVersionResponse" message="tns:IqbExportService_clientVersion_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="closeConnection">
+      <wsdl:input wsaw:Action="http://tempuri.org/IqbExportService/closeConnection" message="tns:IqbExportService_closeConnection_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IqbExportService/closeConnectionResponse" message="tns:IqbExportService_closeConnection_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="connectionError">
+      <wsdl:input wsaw:Action="http://tempuri.org/IqbExportService/connectionError" message="tns:IqbExportService_connectionError_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IqbExportService/connectionErrorResponse" message="tns:IqbExportService_connectionError_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="getLastError">
+      <wsdl:input wsaw:Action="http://tempuri.org/IqbExportService/getLastError" message="tns:IqbExportService_getLastError_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IqbExportService/getLastErrorResponse" message="tns:IqbExportService_getLastError_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="receiveResponseXML">
+      <wsdl:input wsaw:Action="http://tempuri.org/IqbExportService/receiveResponseXML" message="tns:IqbExportService_receiveResponseXML_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IqbExportService/receiveResponseXMLResponse" message="tns:IqbExportService_receiveResponseXML_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="sendRequestXML">
+      <wsdl:input wsaw:Action="http://tempuri.org/IqbExportService/sendRequestXML" message="tns:IqbExportService_sendRequestXML_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IqbExportService/sendRequestXMLResponse" message="tns:IqbExportService_sendRequestXML_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_IqbExportService" type="tns:IqbExportService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="authenticate">
+      <soap:operation soapAction="http://tempuri.org/IqbExportService/authenticate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="clientVersion">
+      <soap:operation soapAction="http://tempuri.org/IqbExportService/clientVersion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="closeConnection">
+      <soap:operation soapAction="http://tempuri.org/IqbExportService/closeConnection" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="connectionError">
+      <soap:operation soapAction="http://tempuri.org/IqbExportService/connectionError" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getLastError">
+      <soap:operation soapAction="http://tempuri.org/IqbExportService/getLastError" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="receiveResponseXML">
+      <soap:operation soapAction="http://tempuri.org/IqbExportService/receiveResponseXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sendRequestXML">
+      <soap:operation soapAction="http://tempuri.org/IqbExportService/sendRequestXML" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="qbExportService">
+    <wsdl:port name="BasicHttpBinding_IqbExportService" binding="tns:BasicHttpBinding_IqbExportService">
+      <soap:address location="http://localhost/qbExportService/qbExportService.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
