@@ -4,7 +4,8 @@ using System.Linq;
 using System.Web;
 
 using System.Text; //String manipulation and formatting
-using System.Reflection; //PropertyInfo class
+using System.Reflection;
+using System.Data; //PropertyInfo class
 
 namespace CSVExportService
 {
@@ -63,7 +64,7 @@ namespace CSVExportService
          * Parameters:  header - Include the name of the property information of the object.
          * Description: Returns a .csv file friendly string. Headers are on by default; pass false to exclude them.
          */ 
-        public string Export(bool header = true)
+        public string Export(bool header = false)
         {
             StringBuilder sb = new StringBuilder(); //Csv friendly string to build.
 
@@ -90,7 +91,9 @@ namespace CSVExportService
              */ 
             foreach(T obj in ObjectList)
             {
-                foreach(PropertyInfo info in objectInfo)
+                DataRow dr = new DataRow();
+
+                foreach (PropertyInfo info in objectInfo)
                 {
                     /*
                      * Append value of the objects property here. Make sure it is in friendly to .csv formatting...

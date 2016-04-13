@@ -38,11 +38,11 @@ namespace qbExportService
 
         #region Session Variables / Context Variables
 
-        private int counter;
+        private static int counter;
         public int Counter
         {
-            get { return this.counter; }
-            set { this.counter = value; }
+            get { return counter; }
+            set { counter = value; }
         }
 
         private int ce_counter;
