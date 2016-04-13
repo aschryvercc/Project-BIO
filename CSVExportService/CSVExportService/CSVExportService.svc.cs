@@ -83,7 +83,7 @@ namespace CSVExportService
         #region Methods
         public string[] authenticate(string userName, string password)
         {
-            string[] resultValue = new string[2];
+           string[] resultValue = new string[2];
            string eventText = "";
 
             /*
@@ -103,10 +103,9 @@ namespace CSVExportService
                 password.Trim().Equals("thisisbad"))
             {
                 /*
-                 * Empty string for the second string value asking QBWebConnector 
-                 * to connect to the company file that is currently opened in QB.
+                 * Empty string for the second string value
                  */
-                resultValue[1] = "c:\\Program Files\\Intuit\\QuickBooks\\sample_product-based business.qbw"; //This is from the sample file...
+                resultValue[1] = "";
             }
             else
             {

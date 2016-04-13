@@ -636,7 +636,7 @@ namespace qbExportService
             }
             else
             {
-                eventText += "Lenght of response revieved = " + response.Length + "\r\n";
+                eventText += "Length of response revieved = " + response.Length + "\r\n";
 
                 request = buildRequest();
 
