@@ -114,7 +114,7 @@
             this.UNameBox2.Name = "UNameBox2";
             this.UNameBox2.Size = new System.Drawing.Size(280, 22);
             this.UNameBox2.TabIndex = 11;
-            this.UNameBox2.Text = "user";
+            this.UNameBox2.Text = "root";
             // 
             // DBBox2
             // 
@@ -122,7 +122,7 @@
             this.DBBox2.Name = "DBBox2";
             this.DBBox2.Size = new System.Drawing.Size(280, 22);
             this.DBBox2.TabIndex = 10;
-            this.DBBox2.Text = "cows2";
+            this.DBBox2.Text = "cow";
             // 
             // IPBox2
             // 
@@ -130,7 +130,7 @@
             this.IPBox2.Name = "IPBox2";
             this.IPBox2.Size = new System.Drawing.Size(280, 22);
             this.IPBox2.TabIndex = 9;
-            this.IPBox2.Text = "MSI\\SQLEXPRESS";
+            this.IPBox2.Text = "MySQL57";
             // 
             // PassBox2
             // 
@@ -240,4 +240,3 @@
         private System.Windows.Forms.Button button5;
     }
 }
-

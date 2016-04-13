@@ -105,7 +105,7 @@ namespace DbConnector
          List<string> columns -- list of columns to select.
          List<string> conditions -- the where conditions of the statement.
          * Return: DataTable PullData -- a datatable containing the pulled data
-         * Description: The method executes a query to a database based off a dynamically created select statement from a single table.
+         * Description: The method executes a query to a database based off a dynamically created select statement from a number of joined tables.
          */
         public DataTable pullData(string table, List<string> columns, List<string> conditions)
         {
@@ -221,7 +221,7 @@ namespace DbConnector
                 {
                     try
                     {
-                        MySqlCommand cmd = new MySqlCommand(buildUpdate(table, row.Field<string>(idRow), idRow, cols, row), MySourceConn);
+                        MySqlCommand cmd = new MySqlCommand(buildUpdate(table, Convert.ToString(row.Field<object>(idRow)), idRow, cols, row), MySourceConn);
                         cmd.ExecuteNonQuery();
                     }
                     catch (Exception ex)
@@ -444,7 +444,7 @@ namespace DbConnector
         {
             //Setup the connection string
             MySqlConnection conn = null;
-            connectionString = @"server=" + server + ";user id=" + userid + ";password=" + password + ";database=" + database;
+            connectionString = @"server=" + server + "; database=" + database + "; uid=" + userid + "; pwd=" + password;
 
             //Try to connect to the database based on the connection string
             //Also fill the table list immediately since the database is currently selected
