@@ -15,21 +15,15 @@ namespace DbConnector
     {
         //tracks connection info
         private DbConnectorInfo SourceDbConnectorInfo; //The source connection information
-        private DbConnectorInfo mgmtConnInfo;
         private MySqlConnection MySourceConn;
         private SqlConnection MsSourceConn = null;  //The source database connection
         private SqlConnection mgmtConn = null;
         private string connectionString = "";   //connection string to a database when connecting the source or destination
         private bool _ConnectionOpen;
-        private bool _mgmtOpen;
         private string _sourceType;
         public bool ConnectionOpen
         {
             get { return _ConnectionOpen; }
-        }
-        public bool mgmtOpen
-        {
-            get { return _mgmtOpen; }
         }
         public string sourceType
         {
@@ -39,32 +33,29 @@ namespace DbConnector
         /*
          * Constructor
          */
-        public DbConnection(DbConnectorInfo connectionInfo, DbConnectorInfo mgmtInfo,  string type)
+        public DbConnection(DbConnectorInfo connectionInfo, string type)
         {
             SourceDbConnectorInfo = connectionInfo;
-            mgmtConnInfo = mgmtInfo;
             _ConnectionOpen = false;
-            _mgmtOpen = false;
             _sourceType = type;
         }
 
         /*
          * Method Name: PullData
          * Parameters: 
-         bool hasJoins -- indicates whether the select statement has joins
          Dictionary<string,string> tablePair -- a dictionary of tables with their identifying column for use in creating joins. (Table, tableID)
          List<string> columns -- list of columns to select.
          List<string> conditions -- the where conditions of the statement.
          * Return: DataTable PullData -- a datatable containing the pulled data
          * Description: The method executes a query to a database based off a dynamically created select statement from a group of joined tables.
          */
-        public DataTable pullData(Dictionary<string, string> tablePair, List<string> columns, List<string> conditions)
+        public DataTable pullData(Dictionary<string, string> tablePair, List<string> joinType, List<string> columns, List<string> conditions)
         {
             DataTable pulledContents = new DataTable();
 
             if (sourceType == "MS")
             {
-                SqlCommand cmd = new SqlCommand(buildSelect(tablePair, columns, conditions), MsSourceConn);
+                SqlCommand cmd = new SqlCommand(buildSelect(tablePair, joinType, columns, conditions), MsSourceConn);
 
                 try
                 {
@@ -81,7 +72,7 @@ namespace DbConnector
             {
                 try
                 {
-                    MySqlCommand cmd = new MySqlCommand(buildSelect(tablePair, columns, conditions), MySourceConn);
+                    MySqlCommand cmd = new MySqlCommand(buildSelect(tablePair, joinType, columns, conditions), MySourceConn);
                     cmd.ExecuteNonQuery();
 
                     MySqlDataAdapter da = new MySqlDataAdapter(cmd);
@@ -100,8 +91,7 @@ namespace DbConnector
         /*
          * Method Name: PullData
          * Parameters: 
-         bool hasJoins -- indicates whether the select statement has joins
-        String Table -- The table to be pulled from.
+         String Table -- The table to be pulled from.
          List<string> columns -- list of columns to select.
          List<string> conditions -- the where conditions of the statement.
          * Return: DataTable PullData -- a datatable containing the pulled data
@@ -241,17 +231,22 @@ namespace DbConnector
          * Return: void
          * Description: The method dynamically creates a select statement based off the parameters it is passed for multiple joined tables.
          */
-        private string buildSelect(Dictionary<string,string> tablePair, List<string> columns, List<string> conditions)
+        private string buildSelect(Dictionary<string,string> tablePair, List<string> joinType, List<string> columns, List<string> conditions)
         {
             //begin query
             string query = "select  ";
+            string s = "";
 
+            if (sourceType == "MS")
+            {
+                s = "\"";
+            }
             //add columns to be selected
             if (columns != null)
             {
                 foreach (string column in columns)
                 {
-                    query += column + ", ";
+                    query += s + column + s +", ";
                 }
                 query = query.Remove(query.Length - 2);
             }
@@ -262,13 +257,13 @@ namespace DbConnector
             }
 
             //add first table to join
-            query += " from " + tablePair.Keys.ElementAt(0) + " ";
+            query += " from " + s + tablePair.Keys.ElementAt(0) + s + " ";
             
             //incrememntally add remaining tables and comparer.
-            for (int i = 0; i < tablePair.Count; i++)
+            for (int i = 0; i < tablePair.Count - 1; i++)
             {
-                query += " joins " + tablePair.Keys.ElementAt(i + 1) + " on " +
-                            tablePair.Values.ElementAt(i) + " = " + tablePair.Values.ElementAt(i+1);
+                query += joinType[i] + " join " + s + tablePair.Keys.ElementAt(i + 1) + s + " on " + s + tablePair.Keys.ElementAt(i) + s + "." + tablePair.Values.ElementAt(i) 
+                        + " = " + s + tablePair.Keys.ElementAt(i + 1) + s + "." + tablePair.Values.ElementAt(i);
             }
 
             //add conditions if applicable.
@@ -300,13 +295,19 @@ namespace DbConnector
         {
             //begin query
             string query = "select  ";
+            string s = "";
+
+            if (sourceType == "MS")
+            {
+                s = "\"";
+            }
 
             //add columns to be selected
             if (columns != null)
             {
                 foreach (string column in columns)
                 {
-                    query += column + ", ";
+                    query += s + column + s + ", ";
                 }
                 query = query.Remove(query.Length - 2);
             }
@@ -317,7 +318,7 @@ namespace DbConnector
                 query += "* ";
             }
 
-            query += " from " + table;
+            query += " from " + s + table + s;
 
             //add conditions if applicable.
             if (conditions != null)
@@ -484,16 +485,6 @@ namespace DbConnector
             //sourceDBName = sourceDbConnectorInfo.database;
         }
 
-        public void OpenMGMTConnection()
-        {
-            mgmtConn = MsInitData(mgmtConnInfo.server, mgmtConnInfo.userid,
-                                      mgmtConnInfo.password, mgmtConnInfo.database);
-
-            _mgmtOpen = true;
-            //sourceTables = ExtractTables(sourceConn);
-            //sourceDBName = sourceDbConnectorInfo.database;
-        }
-
         /*
          * Method Name: CloseDBConnectionLeft/CloseDBConnectionRight
          * Parameters: void
@@ -515,18 +506,6 @@ namespace DbConnector
             }
 
             _ConnectionOpen = false;
-        }
-
-        public void CloseMGMTConnection()
-        {
-            //Close the connections before the application closes
-            if (mgmtConn != null &&
-                mgmtConn.State == ConnectionState.Open)
-            {
-                MsSourceConn.Close();
-            }
-
-            _mgmtOpen = false;
         }
 
         /*
