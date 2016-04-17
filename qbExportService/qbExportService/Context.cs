@@ -13,7 +13,7 @@ namespace qbExportService
 {
     public class Context : IExtension<OperationContext>
     {
-        public static Context Current
+        public Context Current
         {
             get { return OperationContext.Current.Extensions.Find<Context>(); }
         }

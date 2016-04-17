@@ -14,10 +14,14 @@ namespace qbExportService
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "qbExportService" in code, svc and config file together.
     // NOTE: In order to launch WCF Test Client for testing this service, please select qbExportService.svc or qbExportService.svc.cs at the Solution Explorer and start debugging.
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
     public class qbExportService : IqbExportService
     {
         #region Globals
         EventLog eventLog; //Event Logger
+        int ce_counter;
+        int counter;
+        string session_id;
         #endregion
 
         #region Constructor
@@ -27,8 +31,13 @@ namespace qbExportService
              * Initialize event logging
              */
             initEventLog();
+            /*
+             * Initialize session variables
+             */
+            ce_counter = 0;
+            counter = 0;
+            session_id = "";
         }
-
         #endregion
 
         #region Utility
@@ -328,7 +337,8 @@ namespace qbExportService
             eventText += "string password = " + password + "\r\n"; //Also DON'T do this...
             eventText += "\r\n";
 
-            resultValue[0] = Guid.NewGuid().ToString();
+            session_id = Guid.NewGuid().ToString();
+            resultValue[0] = session_id;
 
             //TODO: Add real world authentication for validating username and password
             //That means DON'T do this...
@@ -437,6 +447,7 @@ namespace qbExportService
          * 
          * Description: Called at the end of a succesful session.
          */
+
         public string closeConnection(string ticket)
         {
             string resultValue = null;
@@ -499,9 +510,9 @@ namespace qbExportService
             eventText += "string msg = " + msg + "\r\n";
             eventText += "\r\n";
 
-            if (Context.Current.Ce_counter == null)
+            if (ce_counter == null)
             {
-                Context.Current.Ce_counter = 0;
+                ce_counter = 0;
             }
 
             /*
@@ -521,7 +532,7 @@ namespace qbExportService
             }
             else
             {
-                if (Context.Current.Ce_counter == 0)
+                if (ce_counter == 0)
                 {
 
                 }
@@ -544,7 +555,7 @@ namespace qbExportService
             /*
              * Increase connection error count.
              */
-            Context.Current.Ce_counter += 1;
+            ce_counter += 1;
 
             return resultValue;
         }
@@ -641,7 +652,7 @@ namespace qbExportService
                 request = buildRequest();
 
                 totalRequests = request.Count;
-                requestCount = Convert.ToInt32(Context.Current.Counter);
+                requestCount = Convert.ToInt32(counter);
 
                 //Do something with Quick Books response here..
 
@@ -656,7 +667,7 @@ namespace qbExportService
                 if (percentage >= 100)
                 {
                     requestCount = 0;
-                    Context.Current.Counter = 0;
+                    counter = 0;
                 }
 
                 resultValue = percentage;
@@ -704,12 +715,12 @@ namespace qbExportService
             ArrayList request = buildRequest();
             int totalRequests = request.Count;
 
-            if (Context.Current.Counter == null)
+            if (counter == null)
             {
-                Context.Current.Counter = 0;
+                counter = 0;
             }
 
-            int requestCount = Context.Current.Counter;
+            int requestCount = counter;
 
             /*
              * Build the event log. 
@@ -729,12 +740,12 @@ namespace qbExportService
             {
                 resultValue = request[requestCount].ToString();
                 eventText += "Sending request number = " + (requestCount + 1) + "\r\n";
-                Context.Current.Counter += 1;
+                counter += 1;
             }
             else
             {
                 requestCount = 0;
-                Context.Current.Counter = 0;
+                counter = 0;
                 resultValue = "";
             }
 
