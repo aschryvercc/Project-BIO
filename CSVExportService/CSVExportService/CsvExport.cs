@@ -86,13 +86,15 @@ namespace CSVExportService
                 sb.Remove(sb.Length - 1, 1).AppendLine();
             }
 
+
+            string str = "";
+            int count = 0;
+            int count2 = 0;
             /*
              * For each object in the object list, get the values of its properties and append it to the string.
              */ 
             foreach(T obj in ObjectList)
             {
-                DataRow dr = new DataRow();
-
                 foreach (PropertyInfo info in objectInfo)
                 {
                     /*
@@ -103,13 +105,18 @@ namespace CSVExportService
                      * 
                      * string methodName(object val);
                      */
-                    sb.Append(ConvertToCsv(info.GetValue(obj))).Append(",");
+                    string test = ConvertToCsv(info.GetValue(obj));
+                    sb.Append(test).Append(",");
+
+                    ++count;
                 }
 
                 sb.Remove(sb.Length - 1, 1).AppendLine();
+                ++count2;
             }
 
-            return sb.ToString();
+            //return sb.ToString();
+            return "WTF";
         }
     }
 }

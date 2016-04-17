@@ -1,3 +1,4 @@
+using ServiceTestHarness.CSVExportService;
 using ServiceTestHarness.qbExportService;
 using System;
 using System.Collections.Generic;
@@ -11,35 +12,34 @@ namespace ServiceTestHarness
     {
         static void Main(string[] args)
         {
-            //Console.WriteLine("Starting Service Test Harness...");
-            //Console.WriteLine("Starting CSV Export Service Testing...");
+            Console.WriteLine("Starting Service Test Harness...");
+            Console.WriteLine("Starting CSV Export Service Testing...");
 
-            //CSVExportService csve = new CSVExportService();
-            //CSVExportServiceClient csve = new CSVExportServiceClient();
+            CSVExportServiceClient csve = new CSVExportServiceClient();
 
-            //Console.WriteLine("Authenticating Use...");
-            //Console.WriteLine("Sending bad credentials...");
+            Console.WriteLine("Authenticating Use...");
+            Console.WriteLine("Sending bad credentials...");
 
-            //string[] strs = csve.authenticate("thisis", "bad");
+            string[] strs = csve.authenticate("thisis", "bad");
 
-            //Console.WriteLine("Results: ");
-            //Console.WriteLine("String[0] | Token String = " + strs[0] + "Expecting = GUID value");
-            //Console.WriteLine("String[1] | User Confirmation String = " + strs[1] + " Expecting = nvu");
+            Console.WriteLine("Results: ");
+            Console.WriteLine("String[0] | Token String = " + strs[0] + "Expecting = GUID value");
+            Console.WriteLine("String[1] | User Confirmation String = " + strs[1] + " Expecting = nvu");
 
-            //Console.WriteLine("Sending good credentials...");
+            Console.WriteLine("Sending good credentials...");
 
-            //strs = csve.authenticate("username", "thisisbad");
+            strs = csve.authenticate("username", "thisisbad");
 
-            //Console.WriteLine("Results: ");
-            //Console.WriteLine("String[0] | Token String = " + strs[0] + "Expecting = GUID value");
-            //Console.WriteLine("String[1] | User Confirmation String = " + strs[1] + " Expecting = an empty string");
+            Console.WriteLine("Results: ");
+            Console.WriteLine("String[0] | Token String = " + strs[0] + "Expecting = GUID value");
+            Console.WriteLine("String[1] | User Confirmation String = " + strs[1] + " Expecting = an empty string");
 
-            //Console.WriteLine("Exporting to CSV...");
-            //Console.WriteLine("Sending token = " + strs[0] + "...");
-            //string result = csve.CSVExport(strs[0]);
-            //Console.WriteLine("Writing result to file...");
-            //Logger.logMessage(result);
-            //Console.WriteLine(result);
+            Console.WriteLine("Exporting to CSV...");
+            Console.WriteLine("Sending token = " + strs[0] + "...");
+            string result = csve.CSVExport(strs[0]);
+            Console.WriteLine("Writing result to file...");
+            Logger.logMessage(result);
+            Console.WriteLine(result);
 
             Console.WriteLine("Starting QB Export Service Testing...");
             IqbExportServiceClient qbes = new IqbExportServiceClient();
@@ -47,7 +47,7 @@ namespace ServiceTestHarness
             Console.WriteLine("Authenticating Use...");
             Console.WriteLine("Sending bad credentials...");
 
-            string[] strs = qbes.authenticate("thisis", "bad");
+            strs = qbes.authenticate("thisis", "bad");
             strs = qbes.authenticate("thisis", "bad");
 
             Console.WriteLine("Results: ");

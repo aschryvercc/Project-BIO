@@ -13,7 +13,7 @@ namespace qbExportService
 {
     public class Context : IExtension<OperationContext>
     {
-        public Context Current
+        public static Context Current
         {
             get { return OperationContext.Current.Extensions.Find<Context>(); }
         }
@@ -38,11 +38,11 @@ namespace qbExportService
 
         #region Session Variables / Context Variables
 
-        private static int counter;
+        private int counter;
         public int Counter
         {
-            get { return counter; }
-            set { counter = value; }
+            get { return this.counter; }
+            set { this.counter = value; }
         }
 
         private int ce_counter;

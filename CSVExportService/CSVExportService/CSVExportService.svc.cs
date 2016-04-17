@@ -15,6 +15,21 @@ namespace CSVExportService
     {
         #region Globals
         EventLog eventLog; //Event Logger
+        string session_id;
+        #endregion
+
+        #region Constructor
+        public CSVExportService()
+        {
+            /*
+             * Initialize event logging
+             */
+            initEventLog();
+            /*
+             * Initialize session variables
+             */
+            session_id = "";
+        }
         #endregion
 
         #region utility
@@ -80,6 +95,44 @@ namespace CSVExportService
 
             return;
         }
+        /*
+         * Method:  ConvertToCsv()
+         * Parameters:  table - DataTable to be converted to Csv friendly format.
+         * Description: Converts a DataTable to a Csv friendly formatted string and returns it.
+         */
+        private static string ConvertToCsv(DataTable table)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < table.Columns.Count; ++i)
+            {
+                sb.Append(table.Columns[i].ColumnName);
+                if (i != table.Columns.Count - 1)
+                {
+                    sb.Append(",");
+                }
+                else
+                {
+                    sb.Append("\n");
+                }
+            }
+            foreach (DataRow row in table.Rows)
+            {
+                for (int i = 0; i < table.Columns.Count; ++i)
+                {
+                    sb.Append(row[i].ToString());
+                    if (i != table.Columns.Count - 1)
+                    {
+                        sb.Append(",");
+                    }
+                    else
+                    {
+                        sb.Append("\n");
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
         #endregion
 
         #region Methods
@@ -97,7 +150,8 @@ namespace CSVExportService
             eventText += "string password = " + password + "\r\n"; //Also DON'T do this...
             eventText += "\r\n"; 
 
-            resultValue[0] = Guid.NewGuid().ToString();
+            session_id = Guid.NewGuid().ToString();
+            resultValue[0] = session_id;
 
             //TODO: Add real world authentication for validating username and password
             //That means DON'T do this...
@@ -130,7 +184,7 @@ namespace CSVExportService
         public string CSVExport(string token)
         {
             string returnValue = "";
-            List<DataRow> ls = new List<DataRow>();
+            List<string> ls = new List<string>();
 
             //Extract table invoice data here
 
@@ -154,12 +208,6 @@ namespace CSVExportService
             sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String2", 200, false);
             sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String3", 300, true);
 
-            foreach (DataRow row in sourceData.Rows)
-            {
-                ls.Add(row);
-            }
-
-            //CsvExport<DataRow> csve= new CsvExport<DataRow>(ls);
             string eventText = "";
 
             /*
@@ -172,7 +220,7 @@ namespace CSVExportService
 
             try
             {
-                returnValue = csve.Export();
+                returnValue = ConvertToCsv(sourceData);
             }
             catch(Exception ex)
             {
