@@ -22,6 +22,10 @@ namespace DbScheduler
 
         public override void DoJob()
         {
+            const string ROW_NAME = "rowName";
+            const string ROW_KEY = "rowKey";
+            const string TABLE_NAME = "tableName";
+
             StringBuilder sb = new StringBuilder();
 
             sb.AppendFormat("JobType: {0}", GetName()).AppendLine();
@@ -32,20 +36,18 @@ namespace DbScheduler
             sourceInfo = new DbConnectorInfo();
             destinationInfo = new DbConnectorInfo();
 
-            DbConnection sourceConnection = new DbConnection(sourceInfo);
-            DbConnection destinationConnection = new DbConnection(destinationInfo);
+            DbConnection sourceConnection = new DbConnection(sourceInfo, "MS");
+            DbConnection destinationConnection = new DbConnection(destinationInfo, "MS");
 
-            Dictionary<string, string> keys = new Dictionary<string, string>();
-            keys.Add("company", "company_id");
-            keys.Add("user", "user_id");
-
-            List<string> joins = new List<string>();
-            joins.Add("full");
-            Dictionary<string, string> rightPair = new Dictionary<string, string>();
-            List<string> columns = new List<string>();
-            List<string> conditions = new List<string>();
-            string tableName = "";
-            char useMode = ' ';
+            /*
+             * Build the query for updating from the table.
+             */
+            List<string> columns_to_pull = new List<string>();
+            columns_to_pull.Add(ROW_KEY);
+            columns_to_pull.Add(ROW_NAME);
+            columns_to_pull.Add(TABLE_NAME);
+            List<string> where_clauses = new List<string>();
+            where_clauses.Add("synced = 0");
 
             sb.Append("Connecting to source...").AppendLine();
             sb.AppendFormat("DbConnectorInfo:").AppendLine();
@@ -75,29 +77,28 @@ namespace DbScheduler
              * Pull data from BioLinks.
              * TODO: Figure out wtf this method even takes.
              */
-            DataTable sourceData = sourceConnection.PullData(true, leftPair, rightPair, columns, conditions);
-            
-            sb.AppendFormat("Querying database...with: {0} {1} {2} {3}", leftPair, rightPair, columns).AppendLine();
+            DataTable sourceData = sourceConnection.pullData("updateLog", columns_to_pull, where_clauses);
             
             /*
              * Log the query.
              */
             foreach (DataRow row in sourceData.Rows)
             {
-                foreach (DataColumn col in sourceData.Columns)
-                {
-                    sb.AppendFormat("{0} ", row[col]);
-                }
+                where_clauses = new List<string>();
+                where_clauses.Add(row.Field<string>(ROW_NAME) + "=" + row.Field<string>(ROW_KEY) + " ||");
+                
+                /*
+                 * Pull data from BioLinks.
+                 */
+                sourceData = sourceConnection.pullData(row.Field<string>(TABLE_NAME), null, where_clauses);
 
-                sb.AppendLine();
+                /*
+                 * Insert/Update pulled into BioTrack.
+                 */
+                destinationConnection.update(row.Field<string>(TABLE_NAME), row.Field<string>(ROW_NAME), sourceData);
             }
 
             Logger.logMessage(sb.ToString());
-
-            /*
-             * Insert/Update pulled into BioTrack.
-             */
-            destinationConnection.insertUpdate(tableName, sourceData, useMode);
 
             /*
              * Close the source and destination databases.

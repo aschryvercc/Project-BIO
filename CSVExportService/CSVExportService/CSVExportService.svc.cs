@@ -184,29 +184,41 @@ namespace CSVExportService
         public string CSVExport(string token)
         {
             string returnValue = "";
-            List<string> ls = new List<string>();
+
+            StringBuilder sb = new StringBuilder(); // Result of the query.
 
             //Extract table invoice data here
 
-            //DbConnectorInfo sourceInfo = new DbConnectorInfo();
-            //DbConnection sourceConnection = new DbConnection(sourceInfo);
+            DbConnectorInfo sourceInfo = new DbConnectorInfo();
 
-            //Dictionary<string, string> leftPair = new Dictionary<string, string>();
-            //Dictionary<string, string> rightPair = new Dictionary<string, string>();
-            //List<string> columns = new List<string>();
-            //List<string> conditions = new List<string>();
+            DbConnection sourceConnection = new DbConnection(sourceInfo, "MS");
 
-            DataTable sourceData = new DataTable();//sourceConnection.PullData(true, leftPair, rightPair, columns, conditions);
-            sourceData.Columns.AddRange(new DataColumn[] {
-                new DataColumn("ID", typeof(Guid)),
-                new DataColumn("Date", typeof(DateTime)),
-                new DataColumn("StringValue", typeof(string)),
-                new DataColumn("NumberValue", typeof(int)),
-                new DataColumn("BooleanValue", typeof(bool))
-            });
-            sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String1", 100, true);
-            sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String2", 200, false);
-            sourceData.Rows.Add(Guid.NewGuid(), DateTime.Now, "String3", 300, true);
+            Dictionary<string, string> keys = new Dictionary<string, string>();
+            keys.Add("company", "company_id");
+            keys.Add("user", "user_id");
+
+            List<string> joins = new List<string>();
+            joins.Add("full");
+
+            sb.Append("Connecting to source...").AppendLine();
+            sb.AppendFormat("DbConnectorInfo:").AppendLine();
+            sb.AppendFormat("server: {0}", sourceInfo.server).AppendLine();
+            sb.AppendFormat("database: {0}", sourceInfo.database).AppendLine();
+            sb.AppendFormat("userid: {0}", sourceInfo.userid).AppendLine();
+
+            /*
+             * Open the source and destination databases.
+             */
+            if (!sourceConnection.ConnectionOpen)
+            {
+                sourceConnection.OpenDBConnection();
+            }
+
+            /*
+             * Pull data from BioLinks.
+             * TODO: Figure out wtf this method even takes.
+             */
+            DataTable sourceData = sourceConnection.pullData(keys, joins, null, null);
 
             string eventText = "";
 
@@ -235,6 +247,11 @@ namespace CSVExportService
              * Log the event.
              */
             logEvent(eventText);
+
+            /*
+             * Close the source and destination databases.
+             */
+            sourceConnection.CloseDBConnection();
 
             return returnValue;
         }
