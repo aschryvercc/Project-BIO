@@ -112,7 +112,7 @@ namespace CSVExportService
                 }
                 else
                 {
-                    sb.Append("\n");
+                    sb.AppendLine();
                 }
             }
             foreach (DataRow row in table.Rows)
@@ -126,7 +126,7 @@ namespace CSVExportService
                     }
                     else
                     {
-                        sb.Append("\n");
+                        sb.AppendLine();
                     }
                 }
             }
