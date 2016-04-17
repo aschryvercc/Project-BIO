@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="95b3ee7c-cbbd-4589-9bc6-86fedd0fe611" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="3540e1a1-ba08-4bab-8f77-57a7c75774eb" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
   <ClientOptions>
     <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
     <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
@@ -22,11 +22,11 @@
     <MetadataSource Address="http://localhost/qbExportService/qbExportService.svc" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="qbExportService.xsd" MetadataType="Schema" ID="5a95f141-daa1-415e-89fb-a7f73b0501f2" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd2" />
-    <MetadataFile FileName="qbExportService1.xsd" MetadataType="Schema" ID="3f9dfff2-1b92-40c8-aaf4-b1601dc3797f" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd1" />
-    <MetadataFile FileName="qbExportService2.xsd" MetadataType="Schema" ID="3b3f1751-3c63-4085-aeaa-8aa58f3d8a1c" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd0" />
-    <MetadataFile FileName="qbExportService.disco" MetadataType="Disco" ID="97ba369c-e771-49b1-961e-0dc89f2609ff" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?disco" />
-    <MetadataFile FileName="qbExportService.wsdl" MetadataType="Wsdl" ID="556a6e97-49df-4752-943b-3f79d901be70" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?wsdl" />
+    <MetadataFile FileName="qbExportService.xsd" MetadataType="Schema" ID="b44a3690-619c-4c5b-bb93-948b62e6c61f" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd2" />
+    <MetadataFile FileName="qbExportService1.xsd" MetadataType="Schema" ID="5f20188d-52d3-431a-b6e6-982b7dbf1ff7" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd1" />
+    <MetadataFile FileName="qbExportService2.xsd" MetadataType="Schema" ID="67d9c387-ceed-4b63-bdd8-10b4d7824d1f" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?xsd=xsd0" />
+    <MetadataFile FileName="qbExportService.disco" MetadataType="Disco" ID="a8f872d4-4b11-4889-8bf6-19f9ddc7c5b6" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?disco" />
+    <MetadataFile FileName="qbExportService.wsdl" MetadataType="Wsdl" ID="37b72f04-52b8-4743-b6aa-d31a678a398e" SourceId="1" SourceUrl="http://localhost/qbExportService/qbExportService.svc?wsdl" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

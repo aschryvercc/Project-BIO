@@ -14,7 +14,11 @@ namespace qbExportService
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "qbExportService" in code, svc and config file together.
     // NOTE: In order to launch WCF Test Client for testing this service, please select qbExportService.svc or qbExportService.svc.cs at the Solution Explorer and start debugging.
+<<<<<<< HEAD
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
+=======
+    [ContextBehaviour]
+>>>>>>> 0b038a341d5c90f4efe9c5127518bf46ab549a00
     public class qbExportService : IqbExportService
     {
         #region Globals

@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadataStorage Include="Service References\qbExportService\" />
+    <WCFMetadataStorage Include="Service References\qbExportService\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Service References\qbExportService\qbExportService.disco" />

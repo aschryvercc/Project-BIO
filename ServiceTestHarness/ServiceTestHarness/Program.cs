@@ -1,4 +1,4 @@
-﻿using ServiceTestHarness.qbExportService;
+using ServiceTestHarness.qbExportService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ namespace ServiceTestHarness
             //Console.WriteLine("Starting CSV Export Service Testing...");
 
             //CSVExportService csve = new CSVExportService();
+            //CSVExportServiceClient csve = new CSVExportServiceClient();
 
             //Console.WriteLine("Authenticating Use...");
             //Console.WriteLine("Sending bad credentials...");
@@ -47,6 +48,7 @@ namespace ServiceTestHarness
             Console.WriteLine("Sending bad credentials...");
 
             string[] strs = qbes.authenticate("thisis", "bad");
+            strs = qbes.authenticate("thisis", "bad");
 
             Console.WriteLine("Results: ");
             Console.WriteLine("String[0] | Token String = " + strs[0] + "Expecting = GUID value");

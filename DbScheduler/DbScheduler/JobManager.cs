@@ -8,7 +8,7 @@ using System.Threading; //Thread
 
 namespace DbScheduler
 {
-    class JobManager
+    public class JobManager
     {
 
         public JobManager()
