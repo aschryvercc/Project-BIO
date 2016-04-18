@@ -11,11 +11,12 @@ using System.Text;
 
 namespace CSVExportService
 {
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
     public class CSVExportService : ICSVExportService
     {
         #region Globals
         EventLog eventLog; //Event Logger
-        string session_id;
+        string session_id; //Current Session ID
         #endregion
 
         #region Constructor
@@ -44,7 +45,7 @@ namespace CSVExportService
          */
         private void initEventLog()
         {
-            string source = "qbExportService";
+            string source = "CSVExportService";
 
             try
             {
@@ -98,32 +99,57 @@ namespace CSVExportService
         /*
          * Method:  ConvertToCsv()
          * Parameters:  table - DataTable to be converted to Csv friendly format.
+         * Returns: StringBuilder sb.ToString()
          * Description: Converts a DataTable to a Csv friendly formatted string and returns it.
          */
         private static string ConvertToCsv(DataTable table)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(); //String builder for building the csv string
+
+            /*
+             * For each colummn in the data table add the column name.
+             */
             for (int i = 0; i < table.Columns.Count; ++i)
             {
-                sb.Append(table.Columns[i].ColumnName);
+                sb.Append(table.Columns[i].ColumnName); //Add the column name.
+
+                /*
+                 * If there are more columns, simply add a comma.
+                 */
                 if (i != table.Columns.Count - 1)
                 {
                     sb.Append(",");
                 }
+                /*
+                 * Else end a line...
+                 */
                 else
                 {
                     sb.AppendLine();
                 }
             }
+            /*
+             * For each row in the data table...
+             */
             foreach (DataRow row in table.Rows)
             {
+                /*
+                 * For each colummn in the data table add the column value.
+                 */
                 for (int i = 0; i < table.Columns.Count; ++i)
                 {
-                    sb.Append(row[i].ToString());
+                    sb.Append(row[i].ToString()); //Add the column value.
+
+                    /*
+                     * If there are more columns, simply add a comma.
+                     */
                     if (i != table.Columns.Count - 1)
                     {
                         sb.Append(",");
                     }
+                    /*
+                     * Else end the line...
+                     */
                     else
                     {
                         sb.AppendLine();
@@ -136,6 +162,22 @@ namespace CSVExportService
         #endregion
 
         #region Methods
+        /*
+         * Method:  authenticate()
+         * 
+         * Parameters: string userName, 
+         *             string password
+         * 
+         * Returns: string[] resultValue
+         *  Possible values:
+         *      string[0] = ticket
+         *      string[1] =
+         *          empty string = authentication is valid
+         *          "nvu" = not valid user
+         *          any other string value = an error has occured
+         * 
+         * Description: Verifies a username and password for the web client that is attempting to connect.
+         */
         public string[] authenticate(string userName, string password)
         {
            string[] resultValue = new string[2];
@@ -161,11 +203,11 @@ namespace CSVExportService
                 /*
                  * Empty string for the second string value
                  */
-                resultValue[1] = "";
+                resultValue[1] = ""; //Valid user
             }
             else
             {
-                resultValue[1] = "nvu";
+                resultValue[1] = "nvu"; //Not valid user
             }
 
             eventText += "Return Value       :\r\n";
@@ -180,19 +222,37 @@ namespace CSVExportService
 
             return resultValue;
         }
-        
+
+        /*
+         * Method:  CSVExport()
+         * 
+         * Parameters: string token
+         * 
+         * Returns: StringBuilder sb.ToString()
+         *  Possible values:
+         *      Empty String = No data or error
+         *      CSV formatted string = Valid Export
+         *      Any other string value = an error has occured
+         * 
+         * Description: Returns a csv formatted string from the source database.
+         */
         public string CSVExport(string token)
         {
-            string returnValue = "";
+            string returnValue = ""; //Return value
 
             StringBuilder sb = new StringBuilder(); // Result of the query.
 
-            //Extract table invoice data here
-
+            /*
+             * Extract table invoice data.
+             * 
+             * Set up database connection.
+             */
             DbConnectorInfo sourceInfo = new DbConnectorInfo();
-
             DbConnection sourceConnection = new DbConnection(sourceInfo, "MS");
 
+            /*
+             * Set up query for database.
+             */
             Dictionary<string, string> keys = new Dictionary<string, string>();
             keys.Add("company", "company_id");
             keys.Add("user", "user_id");
@@ -216,7 +276,6 @@ namespace CSVExportService
 
             /*
              * Pull data from BioLinks.
-             * TODO: Figure out wtf this method even takes.
              */
             DataTable sourceData = sourceConnection.pullData(keys, joins, null, null);
 
@@ -232,7 +291,7 @@ namespace CSVExportService
 
             try
             {
-                returnValue = ConvertToCsv(sourceData);
+                returnValue = ConvertToCsv(sourceData); //Get the csv formatted string from the datatable
             }
             catch(Exception ex)
             {

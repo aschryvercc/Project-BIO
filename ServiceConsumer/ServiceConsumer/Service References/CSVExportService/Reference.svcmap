@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="d577646f-48e4-439f-a1ed-b98adff698c2" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost/CsvExportService/CSVExportService.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="CSVExportService.disco" MetadataType="Disco" ID="bd2e2741-156b-4a27-8c23-6616a4252535" SourceId="1" SourceUrl="http://localhost/CsvExportService/CSVExportService.svc?disco" />
+    <MetadataFile FileName="CSVExportService.xsd" MetadataType="Schema" ID="2216fbd7-6fc6-40e5-9286-9660a4ab4548" SourceId="1" SourceUrl="http://localhost/CsvExportService/CSVExportService.svc?xsd=xsd0" />
+    <MetadataFile FileName="CSVExportService1.xsd" MetadataType="Schema" ID="c0478e1a-ec78-4be2-ac5a-c6b74cec5216" SourceId="1" SourceUrl="http://localhost/CsvExportService/CSVExportService.svc?xsd=xsd2" />
+    <MetadataFile FileName="CSVExportService.wsdl" MetadataType="Wsdl" ID="6234f307-15f3-476f-b746-be5407a401f2" SourceId="1" SourceUrl="http://localhost/CsvExportService/CSVExportService.svc?wsdl" />
+    <MetadataFile FileName="CSVExportService2.xsd" MetadataType="Schema" ID="0797a3d3-afc7-45e5-8fa9-7ac60282ca73" SourceId="1" SourceUrl="http://localhost/CsvExportService/CSVExportService.svc?xsd=xsd1" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

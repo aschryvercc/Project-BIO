@@ -12,17 +12,19 @@ using System.Xml; //Regex
 
 namespace qbExportService
 {
-    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "qbExportService" in code, svc and config file together.
-    // NOTE: In order to launch WCF Test Client for testing this service, please select qbExportService.svc or qbExportService.svc.cs at the Solution Explorer and start debugging.
+    /*
+     * Set the service behavior to per session.
+     */
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession)]
     [ContextBehaviour]
     public class qbExportService : IqbExportService
     {
         #region Globals
         EventLog eventLog; //Event Logger
-        int ce_counter;
-        int counter;
-        string session_id;
+        int ce_counter; //Connection Error counter
+        int counter;    //Build request counter
+        string session_id; //Current Session ID 
+        string last_error; //Last connection error
         #endregion
 
         #region Constructor
@@ -38,6 +40,7 @@ namespace qbExportService
             ce_counter = 0;
             counter = 0;
             session_id = "";
+            last_error = "";
         }
         #endregion
 
@@ -75,6 +78,7 @@ namespace qbExportService
                 /*
                  * Do something with this exception...
                  */
+                logEvent(ex.ToString());
             }
 
             return;
@@ -139,6 +143,15 @@ namespace qbExportService
             return resultValue;
         }
 
+        /*
+         * Method:  buildRequest()
+         * 
+         * Parameters: void
+         * 
+         * Returns: req
+         * 
+         * Description: Returns a list of requests for the QuickBooks client to perform.
+         */
         private ArrayList buildRequest()
         {
             string strRequestXML = "";
@@ -326,8 +339,8 @@ namespace qbExportService
          */
         public string[] authenticate(string userName, string password)
         {
-            string[] resultValue = new string[2];
-            string eventText = "";
+            string[] resultValue = new string[2]; //Return value
+            string eventText = "";  //Event text to be logged
 
             /*
              * Build the event log. 
@@ -338,6 +351,9 @@ namespace qbExportService
             eventText += "string password = " + password + "\r\n"; //Also DON'T do this...
             eventText += "\r\n";
 
+            /*
+             * Create a session ticket for the QuickBooks client.
+             */
             session_id = Guid.NewGuid().ToString();
             resultValue[0] = session_id;
 
@@ -354,7 +370,7 @@ namespace qbExportService
             }
             else
             {
-                resultValue[1] = "nvu";
+                resultValue[1] = "nvu"; //not valid user.
             }
 
             eventText += "Return Value       :\r\n";
@@ -386,8 +402,8 @@ namespace qbExportService
          */
         public string clientVersion(string versionNumber)
         {
-            string resultValue = null;
-            string eventText = "";
+            string resultValue = null; //Return value
+            string eventText = ""; //Event text to be logged
 
             /*
              * Get the major and minor parts from the version number.
@@ -451,8 +467,8 @@ namespace qbExportService
 
         public string closeConnection(string ticket)
         {
-            string resultValue = null;
-            string eventText = "";
+            string resultValue = null; //Return value
+            string eventText = ""; //Event text to be logged
 
             /*
              * Build the event log. 
@@ -490,8 +506,8 @@ namespace qbExportService
          */
         public string connectionError(string ticket, string hresult, string msg)
         {
-            string resultValue = null;
-            string eventText = "";
+            string resultValue = null; //Return value
+            string eventText = ""; //Event text to be logged
 
             /*
              * Constant string values for QB errors.
@@ -521,21 +537,24 @@ namespace qbExportService
              */
             if (hresult.Trim().Equals(QB_ERROR_WHEN_PARSING))
             {
+                last_error = "0x80040400 - QuickBooks found an error when parsing the provided XML text stream."; 
                 resultValue = "DONE";
             }
             else if (hresult.Trim().Equals(QB_COULDNT_ACCESS_QB))
             {
+                last_error = "0x80040401 - Could not access QuickBooks.";
                 resultValue = "DONE";
             }
             else if (hresult.Trim().Equals(QB_UNEXPECTED_ERROR))
             {
+                last_error = "0x80040402 - Unexpected error. Check the qbsdklog.txt file for possible, additional information.";
                 resultValue = "DONE";
             }
             else
             {
                 if (ce_counter == 0)
                 {
-
+                    
                 }
                 else
                 {
@@ -572,8 +591,8 @@ namespace qbExportService
          */
         public string getLastError(string ticket)
         {
-            string resultValue = null;
-            string eventText = "";
+            string resultValue = null; //Return value
+            string eventText = ""; //Event text to be logged
 
             /*
              * Build the event log. 
@@ -584,10 +603,9 @@ namespace qbExportService
             eventText += "\r\n";
 
             /*
-             * TODO: Determine last error code... maybe add a global.
-             * For now just return a fake message.
+             * Set the return value to the last connection error value
              */
-            resultValue = "QuickBooks is not running.";
+            resultValue = last_error;
 
 
             eventText += "\r\n";

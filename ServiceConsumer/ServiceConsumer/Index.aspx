@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Index.aspx.cs" Inherits="ServiceConsumer.Index" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="index.aspx.cs" Inherits="ServiceConsumer.index" %>
 
 <!DOCTYPE html>
 
@@ -7,10 +7,8 @@
     <title></title>
 </head>
 <body>
-    <form id="form1" runat="server">
-    <div>
-    
-    </div>
+    <form id="MainForm" runat="server">
+    <div id="MainDiv"></div>
     </form>
 </body>
 </html>

@@ -7,19 +7,23 @@ using System.Text;
 
 namespace qbExportService
 {
-    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IqbExportService" in both code and config file together.
+    /*
+     * Set the service contract to require sessions.
+     */
     [ServiceContract(SessionMode = SessionMode.Required)]
     public interface IqbExportService
     {
+        /*
+         * Operation required to start the session.
+         */
         [OperationContract(IsInitiating = true)]
         string[] authenticate(string userName, string password);
-
+        /* 
+         * Operations available during the session.
+         */
         [OperationContract(IsInitiating = false)]
         string clientVersion(string version);
-
-        [OperationContract(IsInitiating = false, IsTerminating = true)]
-        string closeConnection(string ticket);
-
+        
         [OperationContract(IsInitiating = false)]
         string connectionError(string ticket, string result, string msg);
         
@@ -32,5 +36,10 @@ namespace qbExportService
         [OperationContract(IsInitiating = false)]
         string sendRequestXML(string ticket, string response, string companyFileName,
                               string qbXMLCountry, int qbXMLMajorVersion, int qbXMLMinorVersion);
+        /*
+         * Operation required to terminate the session.
+         */
+        [OperationContract(IsInitiating = false, IsTerminating = true)]
+        string closeConnection(string ticket);
     }
 }
