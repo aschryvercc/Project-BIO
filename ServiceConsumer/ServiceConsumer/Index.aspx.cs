@@ -1,5 +1,5 @@
 ﻿using ServiceConsumer.CSVExportService;
-using ServiceConsumer.qbExportService;
+//using ServiceConsumer.qbExportService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ namespace ServiceConsumer
     public partial class index : System.Web.UI.Page
     {
         CSVExportServiceClient csves;
-        IqbExportServiceClient qbes;
+        //IqbExportServiceClient qbes;
         string csvToken;
         string qbToken;
         string csvString;
@@ -23,13 +23,13 @@ namespace ServiceConsumer
             string[] qbAuthentication = new string[2];
 
             csves = new CSVExportServiceClient();
-            qbes = new IqbExportServiceClient();
+            //qbes = new IqbExportServiceClient();
 
             csvAuthentication = csves.authenticate("username", "thisisbad");
-            qbAuthentication = qbes.authenticate("username", "thisisbad");
+            //qbAuthentication = qbes.authenticate("username", "thisisbad");
 
-            if (csvAuthentication[1].Equals("nvu") ||
-                qbAuthentication[1].Equals("nvu"))
+            if (csvAuthentication[1].Equals("nvu")) //||
+                //qbAuthentication[1].Equals("nvu"))
             {
                 page_wrapper.InnerHtml = "<p>Page not available :(</p> <p>Try Refreshing...</p>";
             }
@@ -43,6 +43,17 @@ namespace ServiceConsumer
             }
         }
 
+        protected void downLoadButton_Click(object sender, EventArgs e)
+        {
+            string sGenName = "CsvExport.csv";
+            string sCsvExport = CSVPreviewBox.Text;
 
+            Byte[] bytes = new byte[sCsvExport.Length * sizeof(char)];
+            System.Buffer.BlockCopy(sCsvExport.ToCharArray(), 0, bytes, 0, bytes.Length);
+            Response.AddHeader("Content-disposition", "attachment; filename=" + sGenName);
+            Response.ContentType = "application/octer-stream";
+            Response.BinaryWrite(bytes);
+            Response.End();
+        }
     }
 }

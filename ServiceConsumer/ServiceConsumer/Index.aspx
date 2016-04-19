@@ -21,7 +21,7 @@
                 <img src="loader.gif" alt="" />
             </div>
             <div id="CsvDiv">
-                <asp:Button Text="Download CSV file..." runat="server"/> 
+                <asp:Button Text="Download CSV file..." onclick="downLoadButton_Click" runat="server"/> 
                 CSV Preview:<br />     
                 <asp:TextBox ID="CSVPreviewBox" runat="server" TextMode="MultiLine" 
                              readonly="true" BorderStyle="Solid" Height="480px" Width="640px" />

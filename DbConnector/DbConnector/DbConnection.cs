@@ -150,7 +150,7 @@ namespace DbConnector
             {
                 try
                 {
-                    SqlCommand cmd = new SqlCommand(buildInsert(table, data), MsSourceConn);
+                    SqlCommand cmd = new SqlCommand("SET IDENTITY_INSERT " + table + " ON;" + buildInsert(table, data) + "SET IDENTITY_INSERT " + table + " OFF;", MsSourceConn);
                     cmd.ExecuteNonQuery();
                 }
                 catch (Exception ex)
@@ -324,11 +324,11 @@ namespace DbConnector
             if (conditions != null)
             {
                 query += " where ";
-                for (int i = 0; i <= conditions.Count; i++)
+                for (int i = 0; i < conditions.Count; i++)
                 {
                     query += conditions[i] + " ";
                 }
-                query = query.Remove(query.Length - 2);
+                //query = query.Remove(query.Length - 2);
             }
 
             query += ";";
@@ -366,9 +366,15 @@ namespace DbConnector
                     if (val.ToString() == "")
                         query += "null, ";
                     else if (val.GetType().Equals(typeof(string)))
+                        query += "'" + val.ToString().Replace("'", "''") + "', ";
+                    else if (val.GetType().Equals(typeof(DateTime)))
                         query += "'" + val.ToString() + "', ";
+                    else if (val.GetType().Equals(typeof(System.Byte[])))
+                        query += "null" + ", ";
                     else if (val != null)
                         query += val.ToString() + ", ";
+                    else
+                        query += "null" + ", ";
 
                 }
                 query = query.Remove(query.Length - 2);

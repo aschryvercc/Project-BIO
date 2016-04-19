@@ -69,16 +69,6 @@
     <None Include="Service References\CSVExportService\CSVExportService2.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Service References\qbExportService\qbExportService.wsdl" />
-    <None Include="Service References\qbExportService\qbExportService.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\qbExportService\qbExportService1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\qbExportService\qbExportService2.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -88,13 +78,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="index.aspx" />
-    <None Include="Service References\qbExportService\qbExportService.disco" />
-    <None Include="Service References\qbExportService\configuration91.svcinfo" />
-    <None Include="Service References\qbExportService\configuration.svcinfo" />
-    <None Include="Service References\qbExportService\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
     <None Include="Service References\CSVExportService\CSVExportService.disco" />
     <None Include="Service References\CSVExportService\configuration91.svcinfo" />
     <None Include="Service References\CSVExportService\configuration.svcinfo" />
@@ -102,6 +85,7 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+    <Content Include="Main.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -118,18 +102,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
-    <Compile Include="Service References\qbExportService\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadataStorage Include="Service References\CSVExportService\" />
-    <WCFMetadataStorage Include="Service References\qbExportService\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

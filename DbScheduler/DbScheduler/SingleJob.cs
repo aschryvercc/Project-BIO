@@ -29,14 +29,12 @@ namespace DbScheduler
             /*
              * TODO: Properly read in connection information here.
              */
-            sourceInfo = new DbConnectorInfo();
-            destinationInfo = new DbConnectorInfo();
-
+            DbConnectorInfo sourceInfo = new DbConnectorInfo("localhost\\SQLEXPRESS", "NORTHWND", "sa", "Conestoga1");
             DbConnection sourceConnection = new DbConnection(sourceInfo, "MS");
 
             Dictionary<string, string> keys = new Dictionary<string, string>();
-            keys.Add("company", "company_id");
-            keys.Add("user", "user_id");
+            keys.Add("Customers", "CustomerID");
+            keys.Add("Orders", "OrderID");
 
             List<string> joins = new List<string>();
             joins.Add("full");
@@ -59,9 +57,7 @@ namespace DbScheduler
              * Pull data from BioLinks.
              * TODO: Figure out wtf this method even takes.
              */
-            DataTable sourceData = sourceConnection.PullData(keys, joins, null, null);
-
-            sb.AppendFormat("Querying database...with: {0} {1} {2} {3}", leftPair, rightPair, columns).AppendLine();
+            DataTable sourceData = sourceConnection.pullData(keys, joins, null, null);
 
             /*
              * Log the query.
@@ -76,7 +72,7 @@ namespace DbScheduler
                 sb.AppendLine();
             }
 
-            Logger.logMessage(sb.ToString(), AppDomain.CurrentDomain.BaseDirectory + AppDomain.CurrentDomain.RelativeSearchPath + "\\Default2.txt");
+            Logger.logMessage(sb.ToString(), AppDomain.CurrentDomain.BaseDirectory + AppDomain.CurrentDomain.RelativeSearchPath + "\\Events2.txt");
 
             /*
              * Close the source and destination databases.
