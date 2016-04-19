@@ -138,7 +138,26 @@ namespace CSVExportService
                  */
                 for (int i = 0; i < table.Columns.Count; ++i)
                 {
-                    sb.Append(row[i].ToString()); //Add the column value.
+                    if (row[i].GetType() == typeof(DateTime))
+                    {
+                        if (((DateTime)row[i]).TimeOfDay.TotalSeconds == 0)
+                        {
+                            sb.Append(((DateTime)row[i]).ToString("yyyy-MM-dd"));
+                        }
+                        else
+                        {
+                            sb.Append(((DateTime)row[i]).ToString("yyyy-MM-dd HH:mm:ss"));
+                        }
+                    }
+                    else if(row[i].ToString().Contains(",") ||
+                        row[i].ToString().Contains("\""))
+                    {
+                        sb.Append('"' + row[i].ToString().Replace("\"", "\"\"") + '"');
+                    }
+                    else
+                    {
+                        sb.Append(row[i].ToString()); //Add the column value.
+                    }
 
                     /*
                      * If there are more columns, simply add a comma.
@@ -247,18 +266,13 @@ namespace CSVExportService
              * 
              * Set up database connection.
              */
-            DbConnectorInfo sourceInfo = new DbConnectorInfo();
+            DbConnectorInfo sourceInfo = new DbConnectorInfo("localhost\\SQLEXPRESS", "NORTHWND", "sa", "Conestoga1");
             DbConnection sourceConnection = new DbConnection(sourceInfo, "MS");
 
             /*
              * Set up query for database.
              */
-            Dictionary<string, string> keys = new Dictionary<string, string>();
-            keys.Add("company", "company_id");
-            keys.Add("user", "user_id");
-
-            List<string> joins = new List<string>();
-            joins.Add("full");
+            ; ;
 
             sb.Append("Connecting to source...").AppendLine();
             sb.AppendFormat("DbConnectorInfo:").AppendLine();
@@ -277,7 +291,7 @@ namespace CSVExportService
             /*
              * Pull data from BioLinks.
              */
-            DataTable sourceData = sourceConnection.pullData(keys, joins, null, null);
+            DataTable sourceData = sourceConnection.pullData("Orders", null, null);
 
             string eventText = "";
 
