@@ -11,12 +11,13 @@ namespace DbConnector
     public class DbConnectorInfo
     {
 
-        public DbConnectorInfo (string serv, string db, string uName, string pass)
+        public DbConnectorInfo (string serv, string db, string uName, string pass, string dbType)
         {
             server = serv;
             database = db;
             userid = uName;
             password = pass;
+            dbtype = dbType;
         }
 
         private string _server;
@@ -46,6 +47,12 @@ namespace DbConnector
         {
             set { this._password = value; }
             get { return this._password; }
+        }
+        private string _dbtype;
+        public string dbtype
+        {
+            set { this._dbtype = value; }
+            get { return this._dbtype; }
         }
     }
 }
