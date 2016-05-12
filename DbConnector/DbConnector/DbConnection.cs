@@ -14,7 +14,8 @@ namespace DbConnector
     public class DbConnection
     {
         private DbConnectorInfo dbConnectorInfo; //The source connection information
-        private object sourceConn;
+        private MySqlConnection MySqlSourceConn;
+        private SqlConnection SqlServerSourceConn;  //The source database connection
         private string connectionString;   //connection string to a database when connecting the source or destination
         private List<string> sourceTables;
         private bool _connectionOpen;
@@ -33,6 +34,20 @@ namespace DbConnector
             connectionString = "";
         }
 
+        #region Utility
+
+        private static void ParameterizedQueries
+        {
+
+        }
+
+        private static void QueryBuilder
+        {
+
+        }
+
+        #endregion
+
         /*
          * Method Name: CloseDBConnectionLeft/CloseDBConnectionRight
          * Parameters: void
@@ -42,10 +57,15 @@ namespace DbConnector
         public void CloseDBConnection()
         {
             //Close the connections before the application closes
-            if (sourceConn != null &&
-                sourceConn.State == ConnectionState.Open)
+            if (SqlServerSourceConn != null &&
+                SqlServerSourceConn.State == ConnectionState.Open && dbConnectorInfo.dbtype == "SQL Server")
             {
-                sourceConn.Close();
+                SqlServerSourceConn.Close();
+            }
+            else if (MySqlSourceConn != null &&
+                MySqlSourceConn.State == ConnectionState.Open && dbConnectorInfo.dbtype == "MySQL")
+            {
+                MySqlSourceConn.Close();
             }
 
             _connectionOpen = false;
@@ -135,15 +155,20 @@ namespace DbConnector
         public void OpenDBConnection()
         {
             //If logging into the source database connect to it
-            if (sourceType == "MS")
-                MsSourceConn = MsInitData(SourceDbConnectorInfo.server, SourceDbConnectorInfo.userid,
-                                      SourceDbConnectorInfo.password, SourceDbConnectorInfo.database);
-            else if (sourceType == "MY")
-                MySourceConn = MyInitData(SourceDbConnectorInfo.server, SourceDbConnectorInfo.userid,
-                                      SourceDbConnectorInfo.password, SourceDbConnectorInfo.database);
+            if (dbConnectorInfo.dbtype == "SQL Server")
+            {
+                SqlServerSourceConn = MsInitData(dbConnectorInfo.server, dbConnectorInfo.userid,
+                                      dbConnectorInfo.password, dbConnectorInfo.database);
+            }
+            else if (dbConnectorInfo.dbtype == "MySQL")
+            {
+                MySqlSourceConn = MyInitData(dbConnectorInfo.server, dbConnectorInfo.userid,
+                                      dbConnectorInfo.password, dbConnectorInfo.database);
+            }
 
-            _ConnectionOpen = true;
-            sourceTables = ExtractTables(sourceConn);
+            _connectionOpen = true;
         }
+
+
     }
 }
