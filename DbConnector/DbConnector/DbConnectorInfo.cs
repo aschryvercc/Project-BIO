@@ -17,7 +17,16 @@ namespace DbConnector
             database = db;
             userid = uName;
             password = pass;
-            dbtype = dbType;
+            
+            if (dbType.Equals(DbType.MYSQL.ToString()) ||
+                dbType.Equals(DbType.SQLSERVER.ToString()))
+            {
+                dbtype = dbType;
+            }
+            else
+            {
+                throw new ArgumentException("Unknown Database Type", "dbType");
+            }
         }
 
         private string _server;
