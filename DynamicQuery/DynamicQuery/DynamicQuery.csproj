@@ -41,10 +41,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomConfiguration\ColumnCollection.cs" />
+    <Compile Include="CustomConfiguration\DbTableSections.cs" />
     <Compile Include="CustomConfiguration\TableCollection.cs" />
     <Compile Include="CustomConfiguration\TableElement.cs" />
     <Compile Include="CustomConfiguration\ColumnElement.cs" />
     <Compile Include="CustomConfiguration\TableSection.cs" />
+    <Compile Include="CustomConfiguration\TableSectionCollection.cs" />
     <Compile Include="IExecuteBuilder.cs" />
     <Compile Include="ExecuteBuilder.cs" />
     <Compile Include="QueryBuilder.cs" />

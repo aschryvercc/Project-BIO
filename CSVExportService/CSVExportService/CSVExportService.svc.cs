@@ -300,9 +300,9 @@ namespace CSVExportService
                 /*
                  * Set up query for database.
                  */
-                DynamicQuery.CustomConfiguration.TableSection config = (DynamicQuery.CustomConfiguration.TableSection)ConfigurationManager.GetSection("tableSection");
+                DynamicQuery.CustomConfiguration.DbTableSections config = (DynamicQuery.CustomConfiguration.DbTableSections)ConfigurationManager.GetSection("dbTableSections");
                 QueryBuilder qb = new QueryBuilder();
-                qb.SelectFromTables(config.Tables[0].Name);
+                qb.SelectFromTables(config.TableSections[0].Tables[0].Name);
                 qb.SelectAllColumns();
                 string query = qb.BuildQuery();
 
