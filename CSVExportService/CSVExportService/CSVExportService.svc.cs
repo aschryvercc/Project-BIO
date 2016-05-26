@@ -1,5 +1,4 @@
-﻿using DbConnector;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -8,6 +7,10 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+
+using DynamicQuery;
+using System.Data.Common;
+using System.Configuration;
 
 namespace CSVExportService
 {
@@ -261,38 +264,6 @@ namespace CSVExportService
 
             StringBuilder sb = new StringBuilder(); // Result of the query.
 
-            /*
-             * Extract table invoice data.
-             * 
-             * Set up database connection.
-             */
-            DbConnectorInfo sourceInfo = new DbConnectorInfo("localhost\\SQLEXPRESS", "NORTHWND", "sa", "Conestoga1");
-            DbConnection sourceConnection = new DbConnection(sourceInfo, "MS");
-
-            /*
-             * Set up query for database.
-             */
-            ; ;
-
-            sb.Append("Connecting to source...").AppendLine();
-            sb.AppendFormat("DbConnectorInfo:").AppendLine();
-            sb.AppendFormat("server: {0}", sourceInfo.server).AppendLine();
-            sb.AppendFormat("database: {0}", sourceInfo.database).AppendLine();
-            sb.AppendFormat("userid: {0}", sourceInfo.userid).AppendLine();
-
-            /*
-             * Open the source and destination databases.
-             */
-            if (!sourceConnection.ConnectionOpen)
-            {
-                sourceConnection.OpenDBConnection();
-            }
-
-            /*
-             * Pull data from BioLinks.
-             */
-            DataTable sourceData = sourceConnection.pullData("Orders", null, null);
-
             string eventText = "";
 
             /*
@@ -303,11 +274,67 @@ namespace CSVExportService
             eventText += "string token = " + token + "\r\n";
             eventText += "\r\n";
 
+            ConnectionStringSettings connectionStringSettings = ConfigurationManager.ConnectionStrings["Northwind"];
+            DbProviderFactory factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
+            DbConnection conn = factory.CreateConnection();
+            conn.ConnectionString = connectionStringSettings.ConnectionString;
+
+            if (conn.State == ConnectionState.Closed)
+            {
+                try
+                {
+                    conn.Open();
+                }
+                catch (Exception ex)
+                {
+                    logEvent(ex.ToString());
+                }
+            }
+
             try
             {
-                returnValue = ConvertToCsv(sourceData); //Get the csv formatted string from the datatable
+                /*
+                 * Set up query for database.
+                 */
+                DynamicQuery.CustomConfiguration.TableSection config = (DynamicQuery.CustomConfiguration.TableSection)ConfigurationManager.GetSection("tableSection");
+                QueryBuilder qb = new QueryBuilder();
+                qb.SelectFromTables(config.Tables[0].Name);
+                qb.SelectAllColumns();
+                string query = qb.BuildQuery();
+
+                /*
+                 * Create the database commands.
+                 */
+                using (DbCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = query;
+                    cmd.CommandTimeout = 10;
+
+                    /*
+                     * Create a datatable based on the schema of the selected table.
+                     */
+                    using (DbDataAdapter da = factory.CreateDataAdapter())
+                    {
+                        DbCommandBuilder cb = factory.CreateCommandBuilder();
+                        da.SelectCommand = cmd;
+                        DataTable sourceData = new DataTable();
+                        da.FillSchema(sourceData, SchemaType.Mapped);
+                        cb.DataAdapter = da;
+                        DbCommand[] cmds = new DbCommand[3];
+                        cmds[0] = cb.GetUpdateCommand();
+                        cmds[1] = cb.GetDeleteCommand();
+                        cmds[2] = cb.GetInsertCommand();
+
+                        /*
+                         * Fill in the datatable information.
+                         */
+                        da.Fill(sourceData);
+                        returnValue = ConvertToCsv(sourceData); //Get the csv formatted string from the datatable
+                    }
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logEvent(ex.ToString());
             }
@@ -324,7 +351,8 @@ namespace CSVExportService
             /*
              * Close the source and destination databases.
              */
-            sourceConnection.CloseDBConnection();
+            //sourceConnection.CloseDBConnection();
+            conn.Close();
 
             return returnValue;
         }

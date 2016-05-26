@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DynamicQuery.CustomConfiguration
+{
+    public class ColumnElement : ConfigurationElement
+    {
+        [ConfigurationProperty("name", IsRequired = true, IsKey = true)]
+        public string Name
+        {
+            get { return (string)this["name"]; }
+            set { this["name"] = value; }
+        }
+
+        [ConfigurationProperty("datatype", IsRequired = false)]
+        public string Datatype
+        {
+            get { return (string)this["column"]; }
+            set { this["column"] = value; }
+        }
+    }
+}

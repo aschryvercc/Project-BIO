@@ -39,8 +39,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DbConnector">
-      <HintPath>..\..\DbConnector\DbConnector\bin\Debug\DbConnector.dll</HintPath>
+    <Reference Include="DynamicQuery, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Users\Aaron\Desktop\DynamicQuery\DynamicQuery\bin\Debug\DynamicQuery.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.DynamicData" />
