@@ -260,11 +260,9 @@ namespace CSVExportService
          */
         public string CSVExport(string token)
         {
-            string returnValue = ""; //Return value
-
-            StringBuilder sb = new StringBuilder(); // Result of the query.
-
-            string eventText = "";
+            string returnValue = ""; // Return value
+            StringBuilder sb = new StringBuilder(); // Result of the query
+            string eventText = ""; // Text for the event log
 
             /*
              * Build the event log. 
@@ -274,11 +272,17 @@ namespace CSVExportService
             eventText += "string token = " + token + "\r\n";
             eventText += "\r\n";
 
+            /*
+             * Create connection to the database.
+             */
             ConnectionStringSettings connectionStringSettings = ConfigurationManager.ConnectionStrings["Northwind"];
             DbProviderFactory factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
             DbConnection conn = factory.CreateConnection();
             conn.ConnectionString = connectionStringSettings.ConnectionString;
 
+            /*
+             * Open the database.
+             */
             if (conn.State == ConnectionState.Closed)
             {
                 try
@@ -351,7 +355,6 @@ namespace CSVExportService
             /*
              * Close the source and destination databases.
              */
-            //sourceConnection.CloseDBConnection();
             conn.Close();
 
             return returnValue;
